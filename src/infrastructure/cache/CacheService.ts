@@ -1,4 +1,4 @@
-import { redis } from '../../config/redis';
+import { redis } from '../../core/config/redis';
 
 export class CacheService {
   async get(key: string): Promise<string | null> {
