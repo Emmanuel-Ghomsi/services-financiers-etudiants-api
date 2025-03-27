@@ -13,6 +13,7 @@ export class UserEntity {
   lastname?: string;
   phone?: string;
   address?: string;
+  profilePicture?: string | null;
   status!: UserStatus;
   roles!: string[];
   emailVerified!: boolean;
@@ -53,5 +54,19 @@ export class UserEntity {
    */
   isVerified(): boolean {
     return this.emailVerified;
+  }
+
+  /**
+   * Vérifie si le compte est bloqué
+   */
+  isBlocked(): boolean {
+    return this.status === UserStatus.BLOCKED;
+  }
+
+  /**
+   * Vérifie si une demande de suppression a été faite
+   */
+  isPendingDeletion(): boolean {
+    return this.status === UserStatus.PENDING_DELETION;
   }
 }

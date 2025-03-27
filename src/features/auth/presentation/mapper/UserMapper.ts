@@ -1,10 +1,8 @@
-import { UserEntity } from '../../data/entity/UserEntity';
 import { UserDTO } from '../dto/UserDTO';
+import { UserEntity } from '../../data/entity/UserEntity';
 
 /**
- * Convertit une entité User en DTO.
- * @param entity L'utilisateur en tant qu'entité métier
- * @returns DTO à exposer au frontend
+ * Convertit une entité métier en DTO exposé
  */
 export function toUserDTO(entity: UserEntity): UserDTO {
   return {
@@ -15,16 +13,18 @@ export function toUserDTO(entity: UserEntity): UserDTO {
     lastname: entity.lastname || '',
     phone: entity.phone || '',
     address: entity.address || '',
+    profilePicture: entity.profilePicture || null,
     roles: entity.roles,
     status: entity.status,
     emailVerified: entity.emailVerified,
     createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
+    deletedAt: entity.deletedAt || null,
   };
 }
 
 /**
- * Convertit un DTO utilisateur en entité User.
- * Utile pour reconstruction lors de modification ou mise à jour.
+ * Recrée une entité à partir d’un DTO
  */
 export function fromUserDTO(dto: UserDTO): UserEntity {
   return new UserEntity({
@@ -35,10 +35,12 @@ export function fromUserDTO(dto: UserDTO): UserEntity {
     lastname: dto.lastname,
     phone: dto.phone,
     address: dto.address,
+    profilePicture: dto.profilePicture,
     roles: dto.roles,
     status: dto.status as any,
     emailVerified: dto.emailVerified,
     createdAt: dto.createdAt,
-    updatedAt: new Date(),
+    updatedAt: dto.updatedAt,
+    deletedAt: dto.deletedAt,
   });
 }

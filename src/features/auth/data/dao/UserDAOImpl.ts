@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RoleEnum, UserStatus } from '@prisma/client';
 import { UserDAO } from './UserDAO';
 import { UserEntity } from '../entity/UserEntity';
 import { RegisterRequest } from '../../presentation/request/RegisterRequest';
@@ -184,5 +184,99 @@ export class UserDAOImpl implements UserDAO {
       where: { id: userId },
       data: { password: newHashedPassword },
     });
+  }
+
+  async findAll(): Promise<UserEntity[]> {
+    const users = await this.prisma.user.findMany({
+      include: { roles: { include: { role: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return users.map(
+      (user) =>
+        new UserEntity({
+          ...user,
+          roles: user.roles.map((r) => r.role.name),
+        })
+    );
+  }
+
+  async updateUser(id: string, data: Partial<UserEntity>): Promise<UserEntity> {
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: {
+        firstname: data.firstname,
+        lastname: data.lastname,
+        phone: data.phone,
+        address: data.address,
+        profilePicture: data.profilePicture,
+        updatedAt: new Date(),
+      },
+      include: { roles: { include: { role: true } } },
+    });
+
+    return new UserEntity({
+      ...updated,
+      roles: updated.roles.map((r) => r.role.name),
+    });
+  }
+
+  async softDeleteUser(id: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async updateStatus(id: string, status: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        status: status as UserStatus,
+      },
+    });
+  }
+
+  async addRoleToUser(userId: string, roleName: string): Promise<UserEntity> {
+    await this.prisma.userToRole.create({
+      data: {
+        user: { connect: { id: userId } },
+        role: { connect: { name: roleName as RoleEnum } },
+      },
+    });
+
+    return (await this.findById(userId)) as UserEntity;
+  }
+
+  async updateProfilePicture(userId: string, url: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { profilePicture: url },
+    });
+  }
+
+  async findAllByRoles(roles: string[]): Promise<UserEntity[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              name: { in: roles as RoleEnum[] },
+            },
+          },
+        },
+      },
+      include: {
+        roles: { include: { role: true } },
+      },
+    });
+
+    return users.map(
+      (user) =>
+        new UserEntity({
+          ...user,
+          roles: user.roles.map((r) => r.role.name),
+        })
+    );
   }
 }

@@ -33,4 +33,11 @@ export interface UserDAO {
     password: string
   ): Promise<void>;
   updatePassword(userId: string, newHashedPassword: string): Promise<void>;
+  findAll(): Promise<UserEntity[]>;
+  updateUser(id: string, data: Partial<UserEntity>): Promise<UserEntity>;
+  softDeleteUser(id: string): Promise<void>;
+  updateStatus(id: string, status: string): Promise<void>;
+  addRoleToUser(userId: string, roleName: string): Promise<UserEntity>;
+  updateProfilePicture(userId: string, url: string): Promise<void>;
+  findAllByRoles(roles: string[]): Promise<UserEntity[]>;
 }

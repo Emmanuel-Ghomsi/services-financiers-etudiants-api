@@ -1,13 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { AuthService } from '../service/AuthService';
-import { RegisterRequestSchema } from '@features/auth/presentation/request/RegisterRequest';
 import { AuthController } from '../controller/AuthController';
-import { SetPasswordRequestSchema } from '@features/auth/presentation/request/SetPasswordRequest';
-import { LoginRequestSchema } from '@features/auth/presentation/request/LoginRequest';
-import { RefreshTokenRequestSchema } from '@features/auth/presentation/request/RefreshTokenRequest';
-import { ForgotPasswordRequestSchema } from '@features/auth/presentation/request/ForgotPasswordRequest';
-import { ResetPasswordRequestSchema } from '@features/auth/presentation/request/ResetPasswordRequest';
-import { ChangePasswordRequestSchema } from '@features/auth/presentation/request/ChangePasswordRequest';
+import { zodToSwaggerSchema } from '@core/utils/zodToSwagger';
 
 /**
  * Définit les routes d'authentification de l'application
@@ -22,7 +16,7 @@ export async function registerAuthRoutes(
     '/auth/register',
     {
       schema: {
-        body: RegisterRequestSchema,
+        body: zodToSwaggerSchema('RegisterRequest'),
         tags: ['Auth'],
         summary: 'Créer un utilisateur (admin/super-admin)',
         response: {
@@ -48,7 +42,7 @@ export async function registerAuthRoutes(
     '/auth/set-password',
     {
       schema: {
-        body: SetPasswordRequestSchema,
+        body: zodToSwaggerSchema('SetPasswordRequest'),
         tags: ['Auth'],
         summary: 'Définir le mot de passe via lien reçu par mail',
         response: {
@@ -69,7 +63,7 @@ export async function registerAuthRoutes(
     '/auth/login',
     {
       schema: {
-        body: LoginRequestSchema,
+        body: zodToSwaggerSchema('LoginRequest'),
         tags: ['Auth'],
         summary: 'Connexion utilisateur (username/email + password)',
         response: {
@@ -93,7 +87,7 @@ export async function registerAuthRoutes(
     '/auth/refresh-token',
     {
       schema: {
-        body: RefreshTokenRequestSchema,
+        body: zodToSwaggerSchema('RefreshTokenRequest'),
         tags: ['Auth'],
         summary: 'Rafraîchir un access token expiré',
         response: {
@@ -118,7 +112,7 @@ export async function registerAuthRoutes(
     '/auth/forgot-password',
     {
       schema: {
-        body: ForgotPasswordRequestSchema,
+        body: zodToSwaggerSchema('ForgotPasswordRequest'),
         tags: ['Auth'],
         summary: 'Envoyer un lien de réinitialisation de mot de passe',
       },
@@ -131,7 +125,7 @@ export async function registerAuthRoutes(
     '/auth/reset-password',
     {
       schema: {
-        body: ResetPasswordRequestSchema,
+        body: zodToSwaggerSchema('ResetPasswordRequest'),
         tags: ['Auth'],
         summary: 'Réinitialiser le mot de passe avec un token',
       },
@@ -144,7 +138,7 @@ export async function registerAuthRoutes(
     '/auth/change-password',
     {
       schema: {
-        body: ChangePasswordRequestSchema,
+        body: zodToSwaggerSchema('ChangePasswordRequest'),
         tags: ['Auth'],
         summary: 'Changer son mot de passe (sans ancien mot de passe)',
       },

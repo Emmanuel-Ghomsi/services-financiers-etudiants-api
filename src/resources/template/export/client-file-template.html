@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fiche Client - {{reference}}</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 12px;
+        margin: 40px;
+        background: #ffffff;
+        color: #111;
+      }
+
+      h1 {
+        text-align: center;
+        color: #1d4ed8;
+        font-size: 22px;
+        margin-bottom: 40px;
+      }
+
+      h2 {
+        font-size: 16px;
+        color: #222;
+        border-bottom: 1px solid #ccc;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        padding-bottom: 4px;
+      }
+
+      .field {
+        margin-bottom: 8px;
+      }
+
+      .field label {
+        font-weight: bold;
+        display: inline-block;
+        width: 250px;
+        color: #333;
+      }
+
+      .value {
+        display: inline-block;
+      }
+
+      .section {
+        margin-bottom: 25px;
+      }
+
+      footer {
+        text-align: center;
+        font-size: 10px;
+        margin-top: 40px;
+        color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fiche Client - {{reference}}</h1>
+
+    <div class="section">
+      <h2>Identité du client</h2>
+      <div class="field">
+        <label>Nom :</label><span class="value">{{lastName}}</span>
+      </div>
+      <div class="field">
+        <label>Prénoms :</label><span class="value">{{firstName}}</span>
+      </div>
+      <div class="field">
+        <label>Nom de jeune fille :</label
+        ><span class="value">{{maidenName}}</span>
+      </div>
+      <div class="field">
+        <label>Date de naissance :</label
+        ><span class="value">{{birthDate}}</span>
+      </div>
+      <div class="field">
+        <label>Lieu de naissance (ville) :</label
+        ><span class="value">{{birthCity}}</span>
+      </div>
+      <div class="field">
+        <label>Lieu de naissance (pays) :</label
+        ><span class="value">{{birthCountry}}</span>
+      </div>
+      <div class="field">
+        <label>Type de pièce d'identité :</label
+        ><span class="value">{{identityType}}</span>
+      </div>
+      <div class="field">
+        <label>Numéro de pièce :</label
+        ><span class="value">{{identityNumber}}</span>
+      </div>
+      <div class="field">
+        <label>Nationalité :</label><span class="value">{{nationality}}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Coordonnées</h2>
+      <div class="field">
+        <label>Adresse :</label><span class="value">{{homeAddress}}</span>
+      </div>
+      <div class="field">
+        <label>Adresse postale :</label
+        ><span class="value">{{postalAddress}}</span>
+      </div>
+      <div class="field">
+        <label>Pays de résidence fiscale :</label
+        ><span class="value">{{taxResidenceCountry}}</span>
+      </div>
+      <div class="field">
+        <label>Téléphone(s) :</label><span class="value">{{phoneNumbers}}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Situation</h2>
+      <div class="field">
+        <label>Profession :</label><span class="value">{{profession}}</span>
+      </div>
+      <div class="field">
+        <label>Secteur d'activité :</label
+        ><span class="value">{{businessSector}}</span>
+      </div>
+      <div class="field">
+        <label>Montant des revenus :</label
+        ><span class="value">{{monthlyIncome}} {{incomeCurrency}}</span>
+      </div>
+      <div class="field">
+        <label>Origine des fonds :</label
+        ><span class="value">{{incomeSources}}</span>
+      </div>
+      <div class="field">
+        <label>Patrimoine :</label><span class="value">{{assets}}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Origine des fonds</h2>
+      <div class="field">
+        <label>Sources des fonds :</label>
+        <span class="value"> {{fundSources}} </span>
+      </div>
+
+      <div class="field">
+        <label>Explication du don financier :</label>
+        <span class="value">{{fundDonationExplanation}}</span>
+      </div>
+
+      <div class="field">
+        <label>Nom du fournisseur :</label>
+        <span class="value">{{fundProviderName}}</span>
+      </div>
+
+      <div class="field">
+        <label>Relation avec le client :</label>
+        <span class="value">{{fundProviderRelation}}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Transactions internationales</h2>
+      <div class="field">
+        <label>Opérations internationales :</label
+        ><span class="value">{{hasInternationalOps}}</span>
+      </div>
+      <div class="field">
+        <label>Pays concernés :</label
+        ><span class="value">{{transactionCountries}}</span>
+      </div>
+      <div class="field">
+        <label>Devises utilisées :</label
+        ><span class="value">{{transactionCurrencies}}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>FATCA / LBC-FT</h2>
+      <div class="field">
+        <label>Niveau de risque :</label
+        ><span class="value">{{riskLevel}}</span>
+      </div>
+      <div class="field">
+        <label>Statut FATCA :</label><span class="value">{{fatcaStatus}}</span>
+      </div>
+      <div class="field">
+        <label>Présence d’indices d’américanité :</label
+        ><span class="value">{{hasUsIndications}}</span>
+      </div>
+      <div class="field">
+        <label>Détails :</label
+        ><span class="value">{{usIndicationsDetails}}</span>
+      </div>
+    </div>
+
+    <footer>
+      Export généré automatiquement - Services Financiers Etudiants
+    </footer>
+  </body>
+</html>

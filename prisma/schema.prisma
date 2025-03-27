@@ -18,36 +18,40 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   BLOCKED
+  PENDING_DELETION
 }
 
 model User {
-  id               String         @id @default(uuid())
-  username         String         @unique
-  email            String         @unique
+  id               String     @id @default(uuid())
+  username         String     @unique
+  email            String     @unique
   password         String
   firstname        String
   lastname         String
   phone            String
   address          String
-  emailVerified    Boolean        @default(false)
-  firstLoginToken  String?
+  profilePicture   String? // URL ou path vers la photo de profil
+  emailVerified    Boolean    @default(false)
+  firstLoginToken  String?    @unique
   firstLoginExpiry DateTime?
-  status           UserStatus     @default(ACTIVE)
+  status           UserStatus @default(ACTIVE)
 
-  refreshTokens    RefreshToken[]
-  roles            UserToRole[]
+  refreshTokens RefreshToken[]
+  roles         UserToRole[]
 
-  resetToken         String?  @unique
-  resetTokenExpiry   DateTime?
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
 
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  deletedAt        DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  clientFiles  ClientFile[]
+  Notification Notification[]
 }
 
 model UserRole {
-  id    String     @id @default(uuid())
-  name  RoleEnum   @unique
+  id    String       @id @default(uuid())
+  name  RoleEnum     @unique
   users UserToRole[]
 }
 
@@ -55,8 +59,8 @@ model UserToRole {
   userId String
   roleId String
 
-  user   User     @relation(fields: [userId], references: [id])
-  role   UserRole @relation(fields: [roleId], references: [id])
+  user User     @relation(fields: [userId], references: [id])
+  role UserRole @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
 }
@@ -69,4 +73,121 @@ model RefreshToken {
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model ClientFile {
+  id          String  @id @default(uuid())
+  reference   String  @unique
+  clientCode  String  @unique
+  reason      String // "New Relationship", "Periodic Review"
+  clientType  String // "Titulaire", "Mandataire"
+  nonResident Boolean
+
+  // Step 1: Client Identity
+  lastName            String?
+  firstName           String?
+  email               String?
+  maidenName          String?
+  birthDate           DateTime?
+  birthCity           String?
+  birthCountry        String?
+  identityType        String?
+  identityNumber      String?
+  nationality         String?
+  legalRepresentative String?
+  hasBankAccount      Boolean?
+  taxIdNumber         String?
+  taxCountry          String?
+
+  // Step 2: Contact/Domicile
+  homeAddress         String?
+  postalAddress       String?
+  taxResidenceCountry String?
+  phoneNumbers        String?
+
+  // Step 3: Activity/Situation
+  profession        String?
+  businessSector    String?
+  activityStartDate DateTime?
+  activityArea      String?
+
+  // Step 4: Client Situation
+  incomeSources          String? // "salary", "pension", "retirement", "other"
+  monthlyIncome          Float?
+  incomeCurrency         String?
+  fundsOriginDestination String?
+  assets                 String?
+
+  // Step 5: International Transactions
+  hasInternationalOps   Boolean?
+  transactionCountries  String?
+  transactionCurrencies String?
+
+  // Step 6: Products/Services
+  offeredAccounts String?
+
+  // Step 7: Account Operations
+  expectedOperations String?
+  creditAmount       String?
+  debitAmount        String?
+
+  // Step 8: Politically Exposed Person
+  isPEP         Boolean?
+  pepType       String? // "highPosition" or "closeAssociate"
+  pepMandate    String?
+  pepEndDate    DateTime?
+  pepLinkType   String?
+  pepLastName   String?
+  pepFirstName  String?
+  pepBirthDate  DateTime?
+  pepBirthPlace String?
+
+  // Step 9: AML/CFT Classification
+  riskLevel            String? // "low", "medium", "high"
+  classificationSource String?
+  degradationReason    String?
+  fatcaStatus          String?
+  hasUsIndications     Boolean?
+  usIndicationsDetails String?
+
+  // Status and ownership
+  status                FileStatus @default(DRAFT)
+  creatorId             String
+  validatorAdminId      String?
+  validatorSuperAdminId String?
+  validationDateAdmin   DateTime?
+  validationDateSuper   DateTime?
+  rejectionReason       String?
+
+  fundSources             String[]
+  fundProviderName        String?
+  fundProviderRelation    String?
+  fundDonationExplanation String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  creator   User      @relation(fields: [creatorId], references: [id])
+}
+
+enum FileStatus {
+  DRAFT
+  IN_PROGRESS
+  AWAITING_ADMIN_VALIDATION
+  AWAITING_SUPERADMIN_VALIDATION
+  REJECTED
+  BEING_MODIFIED
+  VALIDATED
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String // ex: "CLIENT_FILE_CREATED", "CLIENT_FILE_VALIDATED"
+  title     String
+  message   String
+  userId    String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }

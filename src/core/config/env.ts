@@ -28,5 +28,8 @@ export const config = {
     port: process.env.SMTP_PORT || 587,
     user: process.env.SMTP_USER || 'user',
     password: process.env.SMTP_PASS || 'password',
+    admin:
+      process.env.SUPER_ADMIN_EMAIL ||
+      'super-admin@services-financiers-etudiants.com',
   },
 };
