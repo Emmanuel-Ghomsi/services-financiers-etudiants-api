@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
+import { ClientFilePaginationDTO } from '@features/clientFile/presentation/dto/ClientFilePaginationDTO';
 import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
 import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
 import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
@@ -7,6 +8,7 @@ import { ClientFileCreateRequest } from '@features/clientFile/presentation/reque
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
 import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
 import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
 import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
 import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
@@ -74,4 +76,19 @@ export interface ClientFileService {
     userId: string,
     data: ClientFileFundOriginRequest
   ): Promise<void>;
+
+  /**
+   * Liste paginée des fiches de l'utilisateur connecté
+   */
+  getMyPaginatedFiles(
+    userId: string,
+    request: ClientFileListRequest
+  ): Promise<ClientFilePaginationDTO>;
+
+  /**
+   * Liste paginée + filtrée de toutes les fiches
+   */
+  getPaginatedAndFilteredFiles(
+    request: ClientFileListRequest
+  ): Promise<ClientFilePaginationDTO>;
 }

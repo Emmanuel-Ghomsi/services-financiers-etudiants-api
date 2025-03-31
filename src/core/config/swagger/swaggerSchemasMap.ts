@@ -16,6 +16,7 @@ import { ClientFileCreateRequestSchema } from '@features/clientFile/presentation
 import { ClientFileFundOriginRequestSchema } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
 import { ClientFileIdentityRequestSchema } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
 import { ClientFileInternationalRequestSchema } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
+import { ClientFileListRequestSchema } from '@features/clientFile/presentation/request/ClientFileListRequest';
 import { ClientFileOperationRequestSchema } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
 import { ClientFilePepRequestSchema } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileServicesRequestSchema } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
@@ -50,4 +51,5 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   ClientFilePepRequest: ClientFilePepRequestSchema,
   ClientFileComplianceRequest: ClientFileComplianceRequestSchema,
   ClientFileFundOriginRequest: ClientFileFundOriginRequestSchema,
+  ClientFileListRequest: ClientFileListRequestSchema,
 };

@@ -13,6 +13,7 @@ import { ClientFileComplianceRequest } from '@features/clientFile/presentation/r
 import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
 import { exportClientFileToWord } from '@infrastructure/export/WordExporter';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
+import { ClientFileListRequestSchema } from '@features/clientFile/presentation/request/ClientFileListRequest';
 
 export class ClientFileController {
   static async create(
@@ -34,26 +35,31 @@ export class ClientFileController {
     const roles = req.user?.roles || [];
     const file = await service.findById(req.params.id, userId, roles);
     res.send(file);
-  }
-
+  } /**
+   * Lister les fiches de l'utilisateur connecté (paginé)
+   */
   static async getMyFiles(
     req: FastifyRequest,
     res: FastifyReply,
     service: ClientFileService
   ) {
-    const userId = req.user?.id;
-    const files = await service.findMyFiles(userId);
-    res.send(files);
+    const user = req.user;
+    const query = ClientFileListRequestSchema.parse(req.query);
+    const result = await service.getMyPaginatedFiles(user.id, query);
+    return res.send(result);
   }
 
+  /**
+   * Lister toutes les fiches clients avec filtres (admin/super-admin)
+   */
   static async getAll(
     req: FastifyRequest,
     res: FastifyReply,
     service: ClientFileService
   ) {
-    const roles = req.user?.roles || [];
-    const files = await service.findAll(roles);
-    res.send(files);
+    const query = ClientFileListRequestSchema.parse(req.query);
+    const result = await service.getPaginatedAndFilteredFiles(query);
+    return res.send(result);
   }
 
   static async delete(

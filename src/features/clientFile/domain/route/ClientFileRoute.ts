@@ -45,20 +45,22 @@ export async function registerClientFileRoutes(
     {
       schema: {
         tags: ['ClientFile'],
-        summary: "Lister les fiches de l'utilisateur connecté",
+        summary: "Lister les fiches de l'utilisateur connecté (paginé)",
+        querystring: zodToSwaggerSchema('ClientFileListRequest'),
       },
       preHandler: [app.authenticate],
     },
     async (req, res) => ClientFileController.getMyFiles(req, res, service)
   );
 
-  // 🗂️ Liste de toutes les fiches (admin / super-admin)
+  // 🗂️ Liste de toutes les fiches (admin / super-admin) avec filtres
   app.get(
     `${prefix}`,
     {
       schema: {
         tags: ['ClientFile'],
-        summary: 'Lister toutes les fiches (admin only)',
+        summary: 'Lister toutes les fiches clients (filtrage + pagination)',
+        querystring: zodToSwaggerSchema('ClientFileListRequest'),
       },
       preHandler: [app.authenticate, app.authorize(['ADMIN', 'SUPER_ADMIN'])],
     },

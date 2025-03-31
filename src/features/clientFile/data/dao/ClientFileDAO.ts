@@ -11,6 +11,7 @@ import { ClientFileOperationRequest } from '@features/clientFile/presentation/re
 import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
 
 export interface ClientFileDAO {
   create(
@@ -62,4 +63,25 @@ export interface ClientFileDAO {
     fileId: string,
     data: ClientFileFundOriginRequest
   ): Promise<void>;
+
+  getPaginatedByUserId(
+    userId: string,
+    request: ClientFileListRequest
+  ): Promise<{
+    items: ClientFileEntity[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    pageLimit: number;
+  }>;
+
+  getPaginatedAndFiltered(request: ClientFileListRequest): Promise<{
+    items: ClientFileEntity[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    pageLimit: number;
+  }>;
 }

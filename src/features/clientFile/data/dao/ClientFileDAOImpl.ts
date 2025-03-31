@@ -13,6 +13,7 @@ import { ClientFileOperationRequest } from '@features/clientFile/presentation/re
 import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
 
 export class ClientFileDAOImpl implements ClientFileDAO {
   constructor(private prisma: PrismaClient) {}
@@ -170,5 +171,88 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     data: ClientFileFundOriginRequest
   ): Promise<void> {
     await this.update(fileId, data);
+  }
+
+  async getPaginatedByUserId(
+    userId: string,
+    request: ClientFileListRequest
+  ): Promise<{
+    items: ClientFileEntity[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    pageLimit: number;
+  }> {
+    const { page = 1, pageSize = 10, pageLimit = 10 } = request;
+    const skip = (page - 1) * pageSize;
+
+    const [items, totalItems] = await Promise.all([
+      this.prisma.clientFile.findMany({
+        where: { creatorId: userId },
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.clientFile.count({ where: { creatorId: userId } }),
+    ]);
+
+    return {
+      items: items as ClientFileEntity[],
+      totalItems,
+      currentPage: page,
+      totalPages: Math.ceil(totalItems / pageSize),
+      pageSize,
+      pageLimit,
+    };
+  }
+
+  async getPaginatedAndFiltered(request: ClientFileListRequest): Promise<{
+    items: ClientFileEntity[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    pageLimit: number;
+  }> {
+    const { page = 1, pageSize = 10, pageLimit = 10, filters = {} } = request;
+    const skip = (page - 1) * pageSize;
+
+    const where: any = {};
+
+    if (filters.reference) {
+      where.reference = { contains: filters.reference, mode: 'insensitive' };
+    }
+    if (filters.lastName) {
+      where.lastName = { contains: filters.lastName, mode: 'insensitive' };
+    }
+    if (filters.clientCode) {
+      where.clientCode = { contains: filters.clientCode, mode: 'insensitive' };
+    }
+    if (filters.status) {
+      where.status = filters.status;
+    }
+    if (filters.email) {
+      where.email = { contains: filters.email, mode: 'insensitive' };
+    }
+
+    const [items, totalItems] = await Promise.all([
+      this.prisma.clientFile.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.clientFile.count({ where }),
+    ]);
+
+    return {
+      items: items as ClientFileEntity[],
+      totalItems,
+      currentPage: page,
+      totalPages: Math.ceil(totalItems / pageSize),
+      pageSize,
+      pageLimit,
+    };
   }
 }

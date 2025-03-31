@@ -19,6 +19,9 @@ import { ClientFileEntity } from '@features/clientFile/data/entity/ClientFileEnt
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
 import { UserDAO } from '@features/auth/data/dao/UserDAO';
 import { NotificationService } from '@features/notification/domain/service/NotificationService';
+import { toClientFilePagination } from '@features/clientFile/presentation/mapper/ClientFilePaginationMapper';
+import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFilePaginationDTO } from '@features/clientFile/presentation/dto/ClientFilePaginationDTO';
 
 export class ClientFileServiceImpl implements ClientFileService {
   constructor(
@@ -222,5 +225,34 @@ export class ClientFileServiceImpl implements ClientFileService {
   ): Promise<void> {
     const file = await this.checkAccess(id, userId, []);
     await this.dao.updateFundOrigin(file.id, data);
+  }
+
+  async getMyPaginatedFiles(
+    userId: string,
+    request: ClientFileListRequest
+  ): Promise<ClientFilePaginationDTO> {
+    const paginated = await this.dao.getPaginatedByUserId(userId, request);
+    return toClientFilePagination(
+      paginated.items,
+      paginated.currentPage,
+      paginated.totalItems,
+      paginated.totalPages,
+      paginated.pageSize,
+      paginated.pageLimit
+    );
+  }
+
+  async getPaginatedAndFilteredFiles(
+    request: ClientFileListRequest
+  ): Promise<ClientFilePaginationDTO> {
+    const paginated = await this.dao.getPaginatedAndFiltered(request);
+    return toClientFilePagination(
+      paginated.items,
+      paginated.currentPage,
+      paginated.totalItems,
+      paginated.totalPages,
+      paginated.pageSize,
+      paginated.pageLimit
+    );
   }
 }

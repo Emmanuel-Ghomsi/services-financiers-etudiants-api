@@ -12,8 +12,15 @@ import { authenticate } from '@core/middlewares/authenticate';
 import { authorize } from '@core/middlewares/authorize';
 import { registerRoutes } from './routes';
 import { registerSchemas } from '@core/config/swagger/registerSchemas';
+import { createDefaultSuperAdmin } from '@scripts/createDefaultSuperAdmin';
+import cors from '@fastify/cors';
 
 const fastify = Fastify({ logger: loggerConfig });
+
+fastify.register(cors, {
+  origin: true,
+  credentials: true,
+});
 
 // Hook lors de la réception d'une requête
 fastify.addHook('onRequest', (req, reply, done) => {
@@ -98,8 +105,8 @@ fastify.get('/ws', { websocket: true }, (conn, req) => {
 // Démarrage du serveur
 export const startServer = async () => {
   try {
-    logger.info('Je suis lancé');
     await registerRoutes(fastify);
+    await createDefaultSuperAdmin();
     await fastify.listen({ port: Number(config.server.port) });
     logger.info(
       `Server running on ${config.server.host}:${config.server.port}`
