@@ -3,6 +3,8 @@ import { PrismaClient, RoleEnum, UserStatus } from '@prisma/client';
 import { UserDAO } from './UserDAO';
 import { UserEntity } from '../entity/UserEntity';
 import { RegisterRequest } from '../../presentation/request/RegisterRequest';
+import { v4 as uuidv4 } from 'uuid';
+import { addHours } from 'date-fns';
 
 export class UserDAOImpl implements UserDAO {
   constructor(private readonly prisma: PrismaClient) {}
@@ -186,10 +188,21 @@ export class UserDAOImpl implements UserDAO {
     });
   }
 
-  async findAll(): Promise<UserEntity[]> {
+  async findPaginated({
+    skip,
+    take,
+    where,
+  }: {
+    skip: number;
+    take: number;
+    where: any;
+  }): Promise<UserEntity[]> {
     const users = await this.prisma.user.findMany({
-      include: { roles: { include: { role: true } } },
+      skip,
+      take,
+      where,
       orderBy: { createdAt: 'desc' },
+      include: { roles: { include: { role: true } } },
     });
 
     return users.map(
@@ -199,6 +212,10 @@ export class UserDAOImpl implements UserDAO {
           roles: user.roles.map((r) => r.role.name),
         })
     );
+  }
+
+  async count(where: any): Promise<number> {
+    return this.prisma.user.count({ where });
   }
 
   async updateUser(id: string, data: Partial<UserEntity>): Promise<UserEntity> {
@@ -278,5 +295,33 @@ export class UserDAOImpl implements UserDAO {
           roles: user.roles.map((r) => r.role.name),
         })
     );
+  }
+
+  async resendFirstLoginToken(email: string): Promise<UserEntity | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { roles: { include: { role: true } } },
+    });
+
+    if (!user) return null;
+
+    // Génère un nouveau token
+    const token = uuidv4();
+    const expiry = addHours(new Date(), 24);
+
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        firstLoginToken: token,
+        firstLoginExpiry: expiry,
+      },
+    });
+
+    return new UserEntity({
+      ...user,
+      firstLoginToken: token,
+      firstLoginExpiry: expiry,
+      roles: user.roles.map((r) => r.role.name),
+    });
   }
 }

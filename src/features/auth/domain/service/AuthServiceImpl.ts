@@ -22,6 +22,8 @@ import { ChangePasswordRequest } from '@features/auth/presentation/request/Chang
 import { toUserDTO } from '@features/auth/presentation/mapper/UserMapper';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
 import { config } from '@core/config/env';
+import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/request/ResendFirstLoginEmailRequest';
+import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
 
 /**
  * Implémentation du service d'authentification
@@ -178,6 +180,16 @@ export class AuthServiceImpl implements AuthService {
     const user = await this.userDAO.findById(userId);
     if (!user) throw new Error('Utilisateur introuvable');
 
+    return toUserDTO(user);
+  }
+
+  async resendFirstLoginEmail({
+    email,
+  }: ResendFirstLoginEmailRequest): Promise<UserDTO> {
+    const user = await this.userDAO.resendFirstLoginToken(email);
+    if (!user) throw new ResourceNotFoundException('Utilisateur introuvable');
+
+    await sendFirstLoginEmail(user.email, user.firstLoginToken!);
     return toUserDTO(user);
   }
 }

@@ -10,6 +10,7 @@ import { ForgotPasswordRequest } from '@features/auth/presentation/request/Forgo
 import { ResetPasswordRequest } from '@features/auth/presentation/request/ResetPasswordRequest';
 import { ChangePasswordRequest } from '@features/auth/presentation/request/ChangePasswordRequest';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
+import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/request/ResendFirstLoginEmailRequest';
 
 /**
  * Interface du service d'authentification
@@ -23,4 +24,7 @@ export interface AuthService {
   resetPassword(data: ResetPasswordRequest): Promise<void>;
   changePassword(userId: string, data: ChangePasswordRequest): Promise<void>;
   getProfile(userId: string): Promise<UserDTO>;
+  resendFirstLoginEmail(
+    request: ResendFirstLoginEmailRequest
+  ): Promise<UserDTO>;
 }

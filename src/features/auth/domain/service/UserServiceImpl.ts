@@ -8,13 +8,43 @@ import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleReque
 import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
 import { toUserDTO } from '@features/auth/presentation/mapper/UserMapper';
 import { sendAccountDeletionRequestEmail } from '@infrastructure/mail/MailProvider';
+import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
+import { PaginatedResult } from '@core/base/PaginatedResult';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly userDAO: UserDAO) {}
 
-  async getAllUsers(): Promise<UserDTO[]> {
-    const users = await this.userDAO.findAll();
-    return users.map(toUserDTO);
+  async getPaginatedUsers(
+    request: UserListRequest
+  ): Promise<PaginatedResult<UserDTO>> {
+    const { page, pageSize, filters } = request;
+    const skip = (page - 1) * pageSize;
+
+    const where = {
+      AND: [
+        { deletedAt: null },
+        filters?.username
+          ? { username: { contains: filters.username, mode: 'insensitive' } }
+          : {},
+        filters?.email
+          ? { email: { contains: filters.email, mode: 'insensitive' } }
+          : {},
+      ],
+    };
+
+    const [items, totalItems] = await Promise.all([
+      this.userDAO.findPaginated({ skip, take: pageSize, where }),
+      this.userDAO.count(where),
+    ]);
+
+    return {
+      items: items.map(toUserDTO),
+      currentPage: page,
+      totalItems,
+      totalPages: Math.ceil(totalItems / pageSize),
+      pageSize,
+      pageLimit: pageSize,
+    };
   }
 
   async getUserById(id: string): Promise<UserDTO> {

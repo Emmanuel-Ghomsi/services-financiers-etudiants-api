@@ -4,6 +4,7 @@ import { UpdateUserRequest } from '@features/auth/presentation/request/UpdateUse
 import { ChangeUserStatusRequest } from '@features/auth/presentation/request/ChangeUserStatusRequest';
 import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
 import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
+import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
 
 export class UserController {
   /**
@@ -14,8 +15,10 @@ export class UserController {
     res: FastifyReply,
     userService: UserService
   ) {
-    const users = await userService.getAllUsers();
-    res.send(users);
+    const result = await userService.getPaginatedUsers(
+      req.query as UserListRequest
+    );
+    res.send(result);
   }
 
   /**

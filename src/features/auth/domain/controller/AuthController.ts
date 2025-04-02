@@ -8,6 +8,7 @@ import { RefreshTokenRequest } from '@features/auth/presentation/request/Refresh
 import { ForgotPasswordRequest } from '@features/auth/presentation/request/ForgotPasswordRequest';
 import { ResetPasswordRequest } from '@features/auth/presentation/request/ResetPasswordRequest';
 import { ChangePasswordRequest } from '@features/auth/presentation/request/ChangePasswordRequest';
+import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/request/ResendFirstLoginEmailRequest';
 
 /**
  * Contrôleur d'authentification (statique uniquement)
@@ -94,5 +95,14 @@ export class AuthController {
 
     const profile = await authService.getProfile(userId);
     return reply.send(profile);
+  }
+
+  static async resendFirstLoginEmail(
+    req: FastifyRequest<{ Body: ResendFirstLoginEmailRequest }>,
+    res: FastifyReply,
+    service: AuthService
+  ) {
+    const result = await service.resendFirstLoginEmail(req.body);
+    return res.send(result);
   }
 }

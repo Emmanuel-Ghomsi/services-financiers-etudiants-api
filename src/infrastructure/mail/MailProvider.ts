@@ -31,7 +31,7 @@ export async function sendFirstLoginEmail(
   const filePath = path.resolve('resources/template/mail/first-login.html');
   let html = fs.readFileSync(filePath, 'utf-8');
 
-  const link = `${config.server.frontend}/set-password?token=${token}`;
+  const link = `${config.server.frontend}/auth/set-password?token=${token}`;
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
@@ -50,7 +50,7 @@ export async function sendResetPasswordEmail(
     'resources/template/mail/reset-password.html',
     'utf-8'
   );
-  const link = `${config.server.frontend}/reset-password?token=${token}`;
+  const link = `${config.server.frontend}/auth/reset-password?token=${token}`;
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
@@ -115,7 +115,7 @@ export async function sendClientFileFinalValidationEmail(
     .replace('{{reference}}', clientFile.reference);
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@service-financier.com>',
+    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
     to: clientFile.email,
     subject: `Votre fiche client est validée - Réf. ${clientFile.reference}`,
     html,

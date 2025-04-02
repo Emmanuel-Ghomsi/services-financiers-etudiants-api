@@ -14,11 +14,12 @@ export async function registerUserRoutes(
 ) {
   // 👥 Liste de tous les utilisateurs (admin/superadmin)
   app.get(
-    '/',
+    '/user',
     {
       schema: {
+        querystring: zodToSwaggerSchema('UserListRequest'),
         tags: ['User'],
-        summary: 'Récupérer tous les utilisateurs',
+        summary: 'Récupérer les utilisateurs avec pagination et filtre',
       },
       preHandler: [app.authenticate, app.authorize(['SUPER_ADMIN', 'ADMIN'])],
     },
@@ -27,7 +28,7 @@ export async function registerUserRoutes(
 
   // 🔎 Obtenir un utilisateur par ID
   app.get(
-    '/:id',
+    '/user/:id',
     {
       schema: {
         tags: ['User'],
@@ -40,7 +41,7 @@ export async function registerUserRoutes(
 
   // ✏️ Mise à jour de son propre profil
   app.put(
-    '/me',
+    '/user/me',
     {
       schema: {
         body: zodToSwaggerSchema('UpdateUserRequest'),
@@ -55,7 +56,7 @@ export async function registerUserRoutes(
 
   // 🛠️ Admin : modifier un utilisateur
   app.put(
-    '/:id',
+    '/user/:id',
     {
       schema: {
         body: zodToSwaggerSchema('UpdateUserRequest'),
@@ -70,7 +71,7 @@ export async function registerUserRoutes(
 
   // 🚫 Modifier le statut (BLOCKED, ACTIVE, etc.)
   app.patch(
-    '/:id/status',
+    '/user/:id/status',
     {
       schema: {
         body: zodToSwaggerSchema('ChangeUserStatusRequest'),
@@ -85,7 +86,7 @@ export async function registerUserRoutes(
 
   // ➕ Ajouter un rôle à un utilisateur
   app.patch(
-    '/:id/role',
+    '/user/:id/role',
     {
       schema: {
         body: zodToSwaggerSchema('AddRoleRequest'),
@@ -99,7 +100,7 @@ export async function registerUserRoutes(
 
   // ❌ Demande de suppression de compte
   app.post(
-    '/me/delete',
+    '/user/me/delete',
     {
       schema: {
         body: zodToSwaggerSchema('DeleteAccountRequest'),

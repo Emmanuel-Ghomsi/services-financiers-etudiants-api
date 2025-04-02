@@ -1,7 +1,7 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { swaggerSchemasMap } from '@core/config/swagger/swaggerSchemasMap';
 
-export const zodToSwaggerSchema = (name: string) => {
+export function zodToSwaggerSchema(name: string) {
   const schema = swaggerSchemasMap[name];
 
   if (!schema) {
@@ -12,4 +12,4 @@ export const zodToSwaggerSchema = (name: string) => {
   const definition = jsonSchema.definitions?.[name] || jsonSchema;
 
   return definition;
-};
+}

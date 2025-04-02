@@ -6,9 +6,11 @@ import { ForgotPasswordRequestSchema } from '@features/auth/presentation/request
 import { LoginRequestSchema } from '@features/auth/presentation/request/LoginRequest';
 import { RefreshTokenRequestSchema } from '@features/auth/presentation/request/RefreshTokenRequest';
 import { RegisterRequestSchema } from '@features/auth/presentation/request/RegisterRequest';
+import { ResendFirstLoginEmailRequestSchema } from '@features/auth/presentation/request/ResendFirstLoginEmailRequest';
 import { ResetPasswordRequestSchema } from '@features/auth/presentation/request/ResetPasswordRequest';
 import { SetPasswordRequestSchema } from '@features/auth/presentation/request/SetPasswordRequest';
 import { UpdateUserRequestSchema } from '@features/auth/presentation/request/UpdateUserRequest';
+import { UserListRequestSchema } from '@features/auth/presentation/request/UserListRequest';
 import { ClientFileActivityRequestSchema } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
 import { ClientFileAddressRequestSchema } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
 import { ClientFileComplianceRequestSchema } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
@@ -32,12 +34,14 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   ForgotPasswordRequest: ForgotPasswordRequestSchema,
   ResetPasswordRequest: ResetPasswordRequestSchema,
   ChangePasswordRequest: ChangePasswordRequestSchema,
+  ResendFirstLoginEmailRequest: ResendFirstLoginEmailRequestSchema,
 
   // 👤 User
   UpdateUserRequest: UpdateUserRequestSchema,
   ChangeUserStatusRequest: ChangeUserStatusRequestSchema,
   AddRoleRequest: AddRoleRequestSchema,
   DeleteAccountRequest: DeleteAccountRequestSchema,
+  UserListRequest: UserListRequestSchema,
 
   // 📄 ClientFile
   ClientFileCreateRequest: ClientFileCreateRequestSchema,

@@ -18,7 +18,7 @@ export async function registerAuthRoutes(
       schema: {
         body: zodToSwaggerSchema('RegisterRequest'),
         tags: ['Auth'],
-        summary: 'Créer un utilisateur (admin/super-admin)',
+        summary: 'Créer un utilisateur',
         response: {
           201: {
             description: 'Utilisateur créé avec succès',
@@ -177,5 +177,20 @@ export async function registerAuthRoutes(
       preHandler: [app.authenticate],
     },
     async (req, res) => AuthController.getProfile(req, res, authService)
+  );
+
+  app.post(
+    '/resend-first-login',
+    {
+      schema: {
+        body: zodToSwaggerSchema('ResendFirstLoginEmailRequest'),
+        tags: ['User'],
+        summary:
+          'Renvoyer le mail de définition du mot de passe à un utilisateur',
+      },
+      preHandler: [app.authenticate, app.authorize(['SUPER_ADMIN', 'ADMIN'])],
+    },
+    async (req, res) =>
+      AuthController.resendFirstLoginEmail(req as any, res, authService)
   );
 }
