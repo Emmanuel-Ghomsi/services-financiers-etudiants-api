@@ -7,9 +7,13 @@ import { ChangeUserStatusRequest } from '@features/auth/presentation/request/Cha
 import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
 import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
 import { toUserDTO } from '@features/auth/presentation/mapper/UserMapper';
-import { sendAccountDeletionRequestEmail } from '@infrastructure/mail/MailProvider';
+import {
+  sendAccountDeletionRequestEmail,
+  sendFirstLoginEmail,
+} from '@infrastructure/mail/MailProvider';
 import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
 import { PaginatedResult } from '@core/base/PaginatedResult';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly userDAO: UserDAO) {}
@@ -63,10 +67,17 @@ export class UserServiceImpl implements UserService {
 
   async adminUpdateUser(
     userId: string,
-    data: UpdateUserRequest
+    data: AdminUpdateUserRequest
   ): Promise<UserDTO> {
-    const updated = await this.userDAO.updateUser(userId, data);
-    return toUserDTO(updated);
+    const updatedUserEntity = await this.userDAO.adminUpdateUser(userId, data);
+
+    // Envoi du mail de première connexion
+    await sendFirstLoginEmail(
+      updatedUserEntity.email,
+      updatedUserEntity.firstLoginToken!
+    );
+
+    return toUserDTO(updatedUserEntity);
   }
 
   async changeStatus(

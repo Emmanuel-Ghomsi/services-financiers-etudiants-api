@@ -2,6 +2,7 @@
 import { PaginatedResult } from '@core/base/PaginatedResult';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
 import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
 import { ChangeUserStatusRequest } from '@features/auth/presentation/request/ChangeUserStatusRequest';
 import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
 import { UpdateUserRequest } from '@features/auth/presentation/request/UpdateUserRequest';
@@ -13,7 +14,10 @@ export interface UserService {
   ): Promise<PaginatedResult<UserDTO>>;
   getUserById(id: string): Promise<UserDTO>;
   updateUserProfile(userId: string, data: UpdateUserRequest): Promise<UserDTO>;
-  adminUpdateUser(userId: string, data: UpdateUserRequest): Promise<UserDTO>;
+  adminUpdateUser(
+    userId: string,
+    data: AdminUpdateUserRequest
+  ): Promise<UserDTO>;
   changeStatus(userId: string, data: ChangeUserStatusRequest): Promise<void>;
   addRole(userId: string, data: AddRoleRequest): Promise<UserDTO>;
   requestDeleteAccount(

@@ -13,12 +13,21 @@ import { NotificationService } from '@features/notification/domain/service/Notif
 import { NotificationDAOImpl } from '@features/notification/data/dao/NotificationDAOImpl';
 import { registerClientFileRoutes } from '@features/clientFile/domain/route/ClientFileRoute';
 import { registerNotificationRoutes } from '@features/notification/domain/route/NotificationRoute';
+import { registerMediaRoutes } from '@features/media/domain/route/MediaRoute';
+import { MediaServiceImpl } from '@features/media/domain/service/MediaServiceImpl';
+import { MediaDAOImpl } from '@features/media/data/dao/MediaDAOImpl';
+import { registerDashboardRoutes } from '@features/dashboard/domain/route/DashboardRoute';
+import { DashboardServiceImpl } from '@features/dashboard/domain/service/DashboardServiceImpl';
+import { DashboardSuperAdminDAOImpl } from '@features/dashboard/data/dao/DashboardSuperAdminDAOImpl';
+import { DashboardAdminDAOImpl } from '@features/dashboard/data/dao/DashboardAdminDAOImpl';
+import { DashboardAdvisorDAOImpl } from '@features/dashboard/data/dao/DashboardAdvisorDAOImpl';
 
 export const registerRoutes = async (app: FastifyInstance) => {
   const prisma = new PrismaClient();
   const userDAO = new UserDAOImpl(prisma);
   const clientFileDAO = new ClientFileDAOImpl(prisma);
   const notificationDAO = new NotificationDAOImpl(prisma);
+  const mediaDAO = new MediaDAOImpl();
 
   const authService = new AuthServiceImpl(userDAO);
   const userService = new UserServiceImpl(userDAO);
@@ -28,6 +37,12 @@ export const registerRoutes = async (app: FastifyInstance) => {
     userDAO,
     notificationService
   );
+  const mediaService = new MediaServiceImpl(mediaDAO, userDAO);
+  const dashboardService = new DashboardServiceImpl(
+    new DashboardSuperAdminDAOImpl(prisma),
+    new DashboardAdminDAOImpl(prisma),
+    new DashboardAdvisorDAOImpl(prisma)
+  );
 
   app.register(
     async (router) => {
@@ -35,6 +50,8 @@ export const registerRoutes = async (app: FastifyInstance) => {
       await registerUserRoutes(router, userService);
       await registerClientFileRoutes(router, clientFileService);
       await registerNotificationRoutes(router, notificationService);
+      await registerMediaRoutes(router, mediaService);
+      await registerDashboardRoutes(router, dashboardService);
     },
     { prefix: `/${config.server.prefix}/` }
   );

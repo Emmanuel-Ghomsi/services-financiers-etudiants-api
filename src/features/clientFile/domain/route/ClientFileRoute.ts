@@ -293,4 +293,18 @@ export async function registerClientFileRoutes(
     async (req, res) =>
       ClientFileController.updateFundOrigin(req as any, res, service)
   );
+
+  app.patch(
+    '/client-files/:id/status',
+    {
+      schema: {
+        body: zodToSwaggerSchema('UpdateClientFileStatusRequest'),
+        tags: ['ClientFile'],
+        summary: 'Modifier le statut d’une fiche client',
+      },
+      preHandler: [app.authenticate],
+    },
+    async (req, res) =>
+      ClientFileController.updateStatus(req as any, res, service)
+  );
 }

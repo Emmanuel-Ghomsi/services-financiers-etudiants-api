@@ -8,7 +8,6 @@ export const UpdateUserRequestSchema = z.object({
   lastname: z.string().min(1, 'Le nom est requis'),
   phone: z.string().min(8, 'Numéro de téléphone invalide'),
   address: z.string().min(3, 'Adresse invalide'),
-  profilePicture: z.string().url('Lien de l’image invalide').optional(),
 });
 
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;

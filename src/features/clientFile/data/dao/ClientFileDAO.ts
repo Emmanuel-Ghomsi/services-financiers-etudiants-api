@@ -12,6 +12,7 @@ import { ClientFilePepRequest } from '@features/clientFile/presentation/request/
 import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
 import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { FileStatus } from '@prisma/client';
 
 export interface ClientFileDAO {
   create(
@@ -84,4 +85,5 @@ export interface ClientFileDAO {
     pageSize: number;
     pageLimit: number;
   }>;
+  updateStatus(id: string, status: FileStatus): Promise<ClientFileEntity>;
 }

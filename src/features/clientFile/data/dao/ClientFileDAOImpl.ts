@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { PrismaClient } from '@prisma/client';
+import { FileStatus, PrismaClient } from '@prisma/client';
 import { ClientFileDAO } from './ClientFileDAO';
 import { ClientFileEntity } from '../entity/ClientFileEntity';
 import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
@@ -254,5 +254,17 @@ export class ClientFileDAOImpl implements ClientFileDAO {
       pageSize,
       pageLimit,
     };
+  }
+
+  async updateStatus(
+    id: string,
+    status: FileStatus
+  ): Promise<ClientFileEntity> {
+    const updated = await this.prisma.clientFile.update({
+      where: { id },
+      data: { status },
+    });
+
+    return new ClientFileEntity(updated);
   }
 }

@@ -28,7 +28,7 @@ export async function sendFirstLoginEmail(
   to: string,
   token: string
 ): Promise<void> {
-  const filePath = path.resolve('resources/template/mail/first-login.html');
+  const filePath = path.resolve('src/resources/template/mail/first-login.html');
   let html = fs.readFileSync(filePath, 'utf-8');
 
   const link = `${config.server.frontend}/auth/set-password?token=${token}`;
@@ -47,7 +47,7 @@ export async function sendResetPasswordEmail(
   token: string
 ): Promise<void> {
   let html = fs.readFileSync(
-    'resources/template/mail/reset-password.html',
+    'src/resources/template/mail/reset-password.html',
     'utf-8'
   );
   const link = `${config.server.frontend}/auth/reset-password?token=${token}`;
@@ -72,7 +72,7 @@ export async function sendAccountDeletionRequestEmail(
   if (!user) return;
 
   const htmlTemplate = fs.readFileSync(
-    path.resolve('resources/template/mail/delete-account-request.html'),
+    path.resolve('src/resources/template/mail/delete-account-request.html'),
     'utf-8'
   );
 
@@ -105,7 +105,9 @@ export async function sendClientFileFinalValidationEmail(
   const pdfBuffer = await exportClientFileToPDF(clientFile);
 
   const htmlTemplate = fs.readFileSync(
-    path.resolve('resources/template/mail/client-file-final-validation.html'),
+    path.resolve(
+      'src/resources/template/mail/client-file-final-validation.html'
+    ),
     'utf-8'
   );
 
@@ -126,5 +128,68 @@ export async function sendClientFileFinalValidationEmail(
         contentType: 'application/pdf',
       },
     ],
+  });
+}
+
+export async function sendClientFileAdminValidationEmail(
+  to: string,
+  reference: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve(
+        'src/resources/template/mail/client-file-awaiting-admin.html'
+      ),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference);
+
+  await transporter.sendMail({
+    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    to,
+    subject: `Nouvelle fiche à valider - Réf. ${reference}`,
+    html,
+  });
+}
+
+export async function sendClientFileSuperAdminValidationEmail(
+  to: string,
+  reference: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve(
+        'src/resources/template/mail/client-file-awaiting-superadmin.html'
+      ),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference);
+
+  await transporter.sendMail({
+    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    to,
+    subject: `Validation finale requise - Réf. ${reference}`,
+    html,
+  });
+}
+
+export async function sendClientFileRejectedEmail(
+  to: string,
+  reference: string,
+  reason: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve('src/resources/template/mail/client-file-rejected.html'),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference)
+    .replace('{{reason}}', reason);
+
+  await transporter.sendMail({
+    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    to,
+    subject: `Fiche client rejetée - Réf. ${reference}`,
+    html,
   });
 }

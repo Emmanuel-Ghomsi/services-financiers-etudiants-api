@@ -22,6 +22,14 @@ import { NotificationService } from '@features/notification/domain/service/Notif
 import { toClientFilePagination } from '@features/clientFile/presentation/mapper/ClientFilePaginationMapper';
 import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
 import { ClientFilePaginationDTO } from '@features/clientFile/presentation/dto/ClientFilePaginationDTO';
+import { FileStatus } from '@prisma/client';
+import { logger } from '@core/config/logger';
+import {
+  sendClientFileAdminValidationEmail,
+  sendClientFileFinalValidationEmail,
+  sendClientFileRejectedEmail,
+  sendClientFileSuperAdminValidationEmail,
+} from '@infrastructure/mail/MailProvider';
 
 export class ClientFileServiceImpl implements ClientFileService {
   constructor(
@@ -196,6 +204,21 @@ export class ClientFileServiceImpl implements ClientFileService {
     }
 
     await this.dao.validateByAdmin(id, validatorId);
+
+    const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+    await this.notificationService.notifyMany(
+      superAdmins.map((a) => a.id),
+      'CLIENT_FILE_TO_FINAL_VALIDATE',
+      'Validation finale requise',
+      `Fiche ${file.reference} à valider définitivement`
+    );
+
+    for (const admin of superAdmins) {
+      await sendClientFileSuperAdminValidationEmail(
+        admin.email,
+        file.reference
+      );
+    }
   }
 
   async validateAsSuperAdmin(id: string, validatorId: string): Promise<void> {
@@ -207,6 +230,16 @@ export class ClientFileServiceImpl implements ClientFileService {
     }
 
     await this.dao.validateBySuperAdmin(id, validatorId);
+
+    await this.notificationService.notify(
+      file.creatorId,
+      'CLIENT_FILE_VALIDATED',
+      'Votre fiche a été validée',
+      `Réf : ${file.reference}`
+    );
+
+    const dto = toClientFileDTO(file);
+    await sendClientFileFinalValidationEmail(dto);
   }
 
   async reject(id: string, validatorId: string, reason: string): Promise<void> {
@@ -215,7 +248,21 @@ export class ClientFileServiceImpl implements ClientFileService {
       throw new ValidationException('Impossible de rejeter cette fiche');
     }
 
+    if (!reason) {
+      throw new ValidationException('Le motif du rejet est obligatoire');
+    }
+
     await this.dao.reject(id, reason);
+
+    await this.notificationService.notify(
+      file.creatorId,
+      'CLIENT_FILE_REJECTED',
+      'Votre fiche a été rejetée',
+      `Réf : ${file.reference} — Raison : ${reason}`
+    );
+
+    if (file.email)
+      await sendClientFileRejectedEmail(file.email, file.reference, reason);
   }
 
   async updateFundOrigin(
@@ -254,5 +301,49 @@ export class ClientFileServiceImpl implements ClientFileService {
       paginated.pageSize,
       paginated.pageLimit
     );
+  }
+
+  async updateStatus(id: string, status: FileStatus): Promise<ClientFileDTO> {
+    const file = await this.dao.findById(id);
+    if (!file) throw new ResourceNotFoundException('Fiche non trouvée');
+
+    const updatedEntity = await this.dao.updateStatus(id, status);
+
+    const creator = await this.userDAO.findById(file.creatorId);
+
+    if (!creator) {
+      logger.warn(`Aucun utilisateur trouvé pour la fiche ${id}`);
+      return toClientFileDTO(updatedEntity);
+    }
+
+    const reference = file.reference;
+
+    if (status === 'AWAITING_ADMIN_VALIDATION') {
+      const admins = await this.userDAO.findAllByRoles(['ADMIN']);
+      await this.notificationService.notifyMany(
+        admins.map((a) => a.id),
+        'CLIENT_FILE_TO_VALIDATE',
+        'Validation fiche client',
+        `Fiche ${reference} à valider`
+      );
+
+      for (const admin of admins) {
+        await sendClientFileAdminValidationEmail(admin.email, reference);
+      }
+    } else if (status === 'AWAITING_SUPERADMIN_VALIDATION') {
+      const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+      await this.notificationService.notifyMany(
+        superAdmins.map((a) => a.id),
+        'CLIENT_FILE_TO_FINAL_VALIDATE',
+        'Validation finale requise',
+        `Fiche ${reference} à valider définitivement`
+      );
+
+      for (const admin of superAdmins) {
+        await sendClientFileSuperAdminValidationEmail(admin.email, reference);
+      }
+    }
+
+    return toClientFileDTO(updatedEntity);
   }
 }

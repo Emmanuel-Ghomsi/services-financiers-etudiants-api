@@ -11,7 +11,7 @@ export async function exportClientFileToPDF(
   client: ClientFileDTO
 ): Promise<Buffer> {
   const templatePath = path.resolve(
-    'resources/template/export/client-file-template.html'
+    'src/resources/template/export/client-file-template.html'
   );
   let html = fs.readFileSync(templatePath, 'utf-8');
 

@@ -9,6 +9,7 @@ export interface ClientFileDTO {
   clientType: string;
   nonResident: boolean;
   status: string;
+  creatorId: string;
 
   lastName?: string | null;
   firstName?: string | null;

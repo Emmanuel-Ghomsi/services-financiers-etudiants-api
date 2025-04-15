@@ -1,4 +1,5 @@
 import { AddRoleRequestSchema } from '@features/auth/presentation/request/AddRoleRequest';
+import { AdminUpdateUserRequestSchema } from '@features/auth/presentation/request/AdminUpdateUserRequest';
 import { ChangePasswordRequestSchema } from '@features/auth/presentation/request/ChangePasswordRequest';
 import { ChangeUserStatusRequestSchema } from '@features/auth/presentation/request/ChangeUserStatusRequest';
 import { DeleteAccountRequestSchema } from '@features/auth/presentation/request/DeleteAccountRequest';
@@ -23,6 +24,9 @@ import { ClientFileOperationRequestSchema } from '@features/clientFile/presentat
 import { ClientFilePepRequestSchema } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileServicesRequestSchema } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
 import { ClientFileSituationRequestSchema } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
+import { UpdateClientFileStatusRequestSchema } from '@features/clientFile/presentation/request/UpdateClientFileStatusRequest';
+import { GetMediaRequestSchema } from '@features/media/presentation/request/GetMediaRequest';
+import { UpdateProfilePictureRequestSchema } from '@features/media/presentation/request/UpdateProfilePictureRequest';
 import { z } from 'zod';
 
 export const swaggerSchemasMap: Record<string, z.ZodType> = {
@@ -42,6 +46,7 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   AddRoleRequest: AddRoleRequestSchema,
   DeleteAccountRequest: DeleteAccountRequestSchema,
   UserListRequest: UserListRequestSchema,
+  AdminUpdateUserRequest: AdminUpdateUserRequestSchema,
 
   // 📄 ClientFile
   ClientFileCreateRequest: ClientFileCreateRequestSchema,
@@ -56,4 +61,9 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   ClientFileComplianceRequest: ClientFileComplianceRequestSchema,
   ClientFileFundOriginRequest: ClientFileFundOriginRequestSchema,
   ClientFileListRequest: ClientFileListRequestSchema,
+  UpdateClientFileStatusRequest: UpdateClientFileStatusRequestSchema,
+
+  // Media
+  UpdateProfilePictureRequest: UpdateProfilePictureRequestSchema,
+  GetMediaRequest: GetMediaRequestSchema,
 };

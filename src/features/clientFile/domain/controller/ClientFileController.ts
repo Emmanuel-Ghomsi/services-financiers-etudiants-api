@@ -14,6 +14,7 @@ import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
 import { exportClientFileToWord } from '@infrastructure/export/WordExporter';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
 import { ClientFileListRequestSchema } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/request/UpdateClientFileStatusRequest';
 
 export class ClientFileController {
   static async create(
@@ -21,8 +22,11 @@ export class ClientFileController {
     res: FastifyReply,
     service: ClientFileService
   ) {
-    const userId = req.user?.id;
-    const created = await service.create(req.body, userId);
+    if (!req.user?.id) {
+      return res.status(401).send({ message: 'Utilisateur non authentifié' });
+    }
+
+    const created = await service.create(req.body, req.user.id);
     res.code(201).send(created);
   }
 
@@ -35,7 +39,9 @@ export class ClientFileController {
     const roles = req.user?.roles || [];
     const file = await service.findById(req.params.id, userId, roles);
     res.send(file);
-  } /**
+  }
+
+  /**
    * Lister les fiches de l'utilisateur connecté (paginé)
    */
   static async getMyFiles(
@@ -272,5 +278,20 @@ export class ClientFileController {
     const userId = req.user?.id;
     await service.updateFundOrigin(req.params.id, userId, req.body);
     res.send({ message: 'Origine des fonds mise à jour' });
+  }
+
+  static async updateStatus(
+    req: FastifyRequest<{
+      Params: { id: string };
+      Body: UpdateClientFileStatusRequest;
+    }>,
+    res: FastifyReply,
+    service: ClientFileService
+  ) {
+    const fileId = req.params.id;
+    const { status } = req.body;
+
+    const updated = await service.updateStatus(fileId, status);
+    res.send(updated);
   }
 }

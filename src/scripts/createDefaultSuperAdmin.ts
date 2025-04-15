@@ -51,6 +51,7 @@ export const createDefaultSuperAdmin = async () => {
       lastname: 'Principal',
       password: hashedPassword,
       phone: '+237600000000',
+      emailVerified: true,
       address: 'Siège Central',
       status: UserStatus.ACTIVE,
       roles: {

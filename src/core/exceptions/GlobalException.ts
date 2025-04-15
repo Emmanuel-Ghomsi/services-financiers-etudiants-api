@@ -12,8 +12,9 @@ export const GlobalException = (
 
   if (error instanceof BaseException) {
     statusCode = error.statusCode;
-    message = error.message;
   }
+
+  message = error.message;
 
   logger.error(`[${req.method}] ${req.url} - ${message}`);
 

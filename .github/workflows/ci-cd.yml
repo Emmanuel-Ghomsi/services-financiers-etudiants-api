@@ -1,62 +1,52 @@
-name: CI/CD Pipeline
+name: Deploy to VPS
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+      - uat
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          node-version: 20
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Lint code
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test
-
-  build-and-deploy:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Docker
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build and push Docker image
+      - name: Add VPS to known_hosts
         run: |
-          docker build -t mydockerhubuser/clean-arch-api:latest .
-          docker push mydockerhubuser/clean-arch-api:latest
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            docker pull mydockerhubuser/clean-arch-api:latest
-            docker stop api || true
-            docker rm api || true
-            docker run -d -p 3000:3000 --name api mydockerhubuser/clean-arch-api:latest
+      - name: Deploy to VPS
+        env:
+          BRANCH: ${{ github.ref_name }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [ "${BRANCH}" = "main" ]; then
+            PROJECT_DIR="services-financiers-etudiants-api"
+          elif [ "${BRANCH}" = "uat" ]; then
+            PROJECT_DIR="services-financiers-etudiants-api-uat"
+          else
+            echo "❌ Branche ${BRANCH} non prévue pour le déploiement"
+            exit 1
+          fi
+
+          echo "🚀 Déploiement sur dossier: $PROJECT_DIR"
+
+          ssh $VPS_USER@$VPS_HOST << EOF
+            cd $PROJECT_DIR
+            git pull origin $BRANCH
+
+            if [ "${BRANCH}" = "main" ]; then
+              docker-compose -f docker-compose.yml up -d --build
+            elif [ "${BRANCH}" = "uat" ]; then
+              docker-compose -f docker-compose.uat.yml up -d --build
+            fi
+          EOF

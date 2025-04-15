@@ -13,6 +13,7 @@ import { ClientFileOperationRequest } from '@features/clientFile/presentation/re
 import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
 import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
 import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
+import { FileStatus } from '@prisma/client';
 
 export interface ClientFileService {
   create(data: ClientFileCreateRequest, userId: string): Promise<ClientFileDTO>;
@@ -91,4 +92,6 @@ export interface ClientFileService {
   getPaginatedAndFilteredFiles(
     request: ClientFileListRequest
   ): Promise<ClientFilePaginationDTO>;
+
+  updateStatus(id: string, status: FileStatus): Promise<ClientFileDTO>;
 }

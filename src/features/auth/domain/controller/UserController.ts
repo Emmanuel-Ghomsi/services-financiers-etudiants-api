@@ -5,6 +5,7 @@ import { ChangeUserStatusRequest } from '@features/auth/presentation/request/Cha
 import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
 import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
 import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
 
 export class UserController {
   /**
@@ -52,7 +53,10 @@ export class UserController {
    * Admin : modifier les informations d'un utilisateur
    */
   static async adminUpdateUser(
-    req: FastifyRequest<{ Params: { id: string }; Body: UpdateUserRequest }>,
+    req: FastifyRequest<{
+      Params: { id: string };
+      Body: AdminUpdateUserRequest;
+    }>,
     res: FastifyReply,
     userService: UserService
   ) {
