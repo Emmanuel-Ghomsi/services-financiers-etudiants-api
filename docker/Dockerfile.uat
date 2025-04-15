@@ -9,6 +9,7 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
+RUN npx prisma generate
 RUN npm run build
 
 # Étape 2 : uat
