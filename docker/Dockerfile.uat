@@ -26,4 +26,4 @@ ENV NODE_ENV=uat
 
 EXPOSE 2026
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "-r", "tsconfig-paths/register", "dist/server.js"]
