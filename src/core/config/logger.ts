@@ -10,12 +10,12 @@ const env = config.server.env;
 const isDev = env === 'development';
 
 // Définir le chemin du fichier log
-const logDir = path.join(__dirname, '../../../logs');
+const logDir = path.join(process.cwd(), 'logs');
 const logFile = path.join(logDir, `api-${env}.log`);
 
-// S'assurer que le dossier `logs` existe
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
+  console.log('[Logger] Created logs directory at:', logDir);
 }
 
 export const logger = pino(

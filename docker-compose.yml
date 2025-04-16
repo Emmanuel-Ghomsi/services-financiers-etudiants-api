@@ -9,8 +9,13 @@ services:
       - '2025:2025'
     env_file:
       - .env
+    volumes:
+      - logs-volume:/app/logs
     networks:
       - shared-network
+
+volumes:
+  logs-volume:
 
 networks:
   shared-network:
