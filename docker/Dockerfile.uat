@@ -30,6 +30,10 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.env.example .env
+
+# Créer dossier de logs
+RUN mkdir -p /app/logs
 
 # Exposition du port utilisé par Fastify
 EXPOSE 2026
