@@ -3,6 +3,8 @@ FROM node:23-slim AS builder
 
 WORKDIR /app
 
+RUN ls -la /app && cat tsconfig.json || echo "tsconfig.json not found"
+
 # Installer uniquement les dépendances nécessaires à la build
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
@@ -26,4 +28,4 @@ ENV NODE_ENV=uat
 
 EXPOSE 2026
 
-CMD ["node", "-r", "tsconfig-paths/register", "dist/server.js"]
+CMD ["node", "-r", "tsconfig-paths/register", "--require", "dotenv/config", "dist/server.js"]
