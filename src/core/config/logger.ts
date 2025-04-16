@@ -15,7 +15,6 @@ const logFile = path.join(logDir, `api-${env}.log`);
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
-  console.log('[Logger] Created logs directory at:', logDir);
 }
 
 export const logger = pino(
