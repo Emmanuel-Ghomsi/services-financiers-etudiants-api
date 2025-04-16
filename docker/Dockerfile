@@ -28,5 +28,5 @@ ENV NODE_ENV=production
 
 EXPOSE 2025
 
-CMD ["node", "-r", "tsconfig-paths/register", "dist/server.js"]
+CMD ["node", "dist/server.js"]
 
