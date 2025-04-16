@@ -1,5 +1,5 @@
 # Étape 1 : build
-FROM node:23-slim AS builder
+FROM node:23-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Étape 2 : production
-FROM node:23-slim AS runner
+FROM node:23-alpine AS runner
 
 WORKDIR /app
 
