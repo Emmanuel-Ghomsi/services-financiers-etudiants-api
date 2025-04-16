@@ -3,6 +3,9 @@ FROM node:23-slim AS builder
 
 WORKDIR /app
 
+# ⚠️ Installation d'OpenSSL
+RUN apt-get update && apt-get install -y openssl
+
 # Installer uniquement les dépendances nécessaires à la build
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
