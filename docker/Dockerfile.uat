@@ -9,6 +9,9 @@ COPY package.json package-lock.json ./
 # Installation des dépendances avec Prisma
 RUN npm install --legacy-peer-deps
 
+# Copie le fichier .env.example
+COPY .env.example .env.example
+
 # Copie du reste de l'application
 COPY . .
 
