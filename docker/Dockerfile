@@ -1,35 +1,39 @@
-# Étape 1 : build
-FROM node:23-alpine AS builder
+# Étape 1 : build (avec Prisma + TypeScript)
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
-# ⚠️ Installation d'OpenSSL
-RUN apt-get update && apt-get install -y openssl
-
-# Installer uniquement les dépendances nécessaires à la build
+# Copie des fichiers nécessaires à l'installation
 COPY package.json package-lock.json ./
+
+# Installation des dépendances avec Prisma
 RUN npm install --legacy-peer-deps
 
+# Copie du reste de l'application
 COPY . .
 
+# Génération du client Prisma
 RUN npx prisma generate
+
+# Compilation TypeScript + ajustement des alias
 RUN npm run build
 
-# Étape 2 : production
-FROM node:23-alpine AS runner
+# Étape 2 : production runner allégé
+FROM node:20-bullseye AS runner
 
 WORKDIR /app
-
-# Copie uniquement les fichiers nécessaires au run
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/src ./src
 
 ENV NODE_ENV=production
 
+# Copie uniquement ce qui est nécessaire pour exécuter l'app
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/public ./public
+
+# Exposition du port utilisé par Fastify
 EXPOSE 2025
 
+# Lancement de l'application sans tsconfig-paths (tsc-alias déjà passé)
 CMD ["node", "dist/server.js"]
-
