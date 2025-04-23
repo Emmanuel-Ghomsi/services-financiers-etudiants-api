@@ -9,6 +9,8 @@ until npx prisma db execute --schema=./prisma/schema.prisma --stdin < /dev/null 
   sleep 3
 done
 
+echo "✅ Base de données accessible."
+
 # Migration de la base
 echo "📦 Application des migrations Prisma..."
 npx prisma migrate deploy
