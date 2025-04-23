@@ -30,7 +30,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env.example .env
 
-COPY --from=builder /app/docker/entrypoint.sh ./entrypoint.sh
+COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 # Créer dossier de logs
