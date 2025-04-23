@@ -119,8 +119,8 @@ export const startServer = async () => {
     );
     return fastify;
   } catch (error) {
-    logger.error(error);
-    process.exit(1);
+    logger.error('Erreur au démarrage de l’application', error);
+    throw error;
   }
 };
 startServer();
