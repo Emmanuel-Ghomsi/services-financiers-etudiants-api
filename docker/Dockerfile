@@ -6,19 +6,14 @@ WORKDIR /app
 # Copie des fichiers nécessaires à l'installation
 COPY package.json package-lock.json ./
 
-# Installation des dépendances avec Prisma
+# Installation des dépendances
 RUN npm install --legacy-peer-deps
-
-# Copie le fichier .env.example
-COPY .env.example .env.example
 
 # Copie du reste de l'application
 COPY . .
 
-# Génération du client Prisma
+# Génération Prisma + build + remplacement des paths
 RUN npx prisma generate
-
-# Compilation TypeScript + ajustement des alias
 RUN npm run build
 
 # Étape 2 : production runner allégé
@@ -28,18 +23,21 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copie uniquement ce qui est nécessaire pour exécuter l'app
+# Copie uniquement les fichiers nécessaires
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env.example .env
 
+COPY --from=builder /app/docker/entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
+
 # Créer dossier de logs
 RUN mkdir -p /app/logs
 
-# Exposition du port utilisé par Fastify
+# Exposition du port
 EXPOSE 2025
 
-# Lancement de l'application sans tsconfig-paths (tsc-alias déjà passé)
-CMD ["node", "dist/server.js"]
+# Lancement
+CMD ["./entrypoint.sh"]
