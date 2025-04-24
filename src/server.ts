@@ -86,7 +86,7 @@ fastify.register(fastifyRateLimit, {
   timeWindow: '1 minute',
   cache: 10000,
   keyGenerator: (req) => req.ip,
-  allowList: ['127.0.0.1'], // Autoriser certaines IPs si nécessaire
+  allowList: ['127.0.0.1', '91.108.102.152'], // Autoriser certaines IPs si nécessaire
   errorResponseBuilder: (req, context) => ({
     statusCode: 429,
     error: 'Too Many Requests',
@@ -112,7 +112,10 @@ export const startServer = async () => {
     await seedUserRoles();
     await registerRoutes(fastify);
     await createDefaultSuperAdmin();
-    await fastify.listen({ port: Number(config.server.port) });
+    await fastify.listen({
+      port: Number(config.server.port),
+      host: '0.0.0.0', // 👈 autorise les connexions depuis toutes les interfaces réseau
+    });
     logger.info(`Server running on ${config.server.host}`);
     return fastify;
   } catch (error) {
