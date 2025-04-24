@@ -42,8 +42,8 @@ jobs:
             PORT=2025
             FRONTEND_URL=${{ secrets.FRONTEND_URL }}
             LOG_LEVEL=info
-            REDIS_HOST=${{ secrets.REDIS_HOST }}"
             PREFIX=api/v1
+            REDIS_HOST=${{ secrets.REDIS_HOST }}"
             COMPOSE_FILE="docker-compose.yml"
           elif [ "$BRANCH" = "uat" ]; then
             PROJECT_DIR="services-financiers-etudiants-api-uat"
@@ -59,8 +59,8 @@ jobs:
             PORT=2026
             FRONTEND_URL=${{ secrets.FRONTEND_UAT_URL }}
             LOG_LEVEL=info
-            REDIS_HOST=${{ secrets.REDIS_HOST }}"
             PREFIX=api/v1
+            REDIS_HOST=${{ secrets.REDIS_HOST }}"
             COMPOSE_FILE="docker-compose.uat.yml"
           else
             echo "❌ Branche $BRANCH non prévue pour le déploiement"
