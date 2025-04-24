@@ -113,9 +113,7 @@ export const startServer = async () => {
     await registerRoutes(fastify);
     await createDefaultSuperAdmin();
     await fastify.listen({ port: Number(config.server.port) });
-    logger.info(
-      `Server running on ${config.server.host}:${config.server.port}`
-    );
+    logger.info(`Server running on ${config.server.host}`);
     return fastify;
   } catch (error) {
     logger.error('Erreur au démarrage de l’application', error);

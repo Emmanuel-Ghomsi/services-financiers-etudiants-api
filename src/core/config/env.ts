@@ -20,7 +20,7 @@ export const config = {
     env: process.env.NODE_ENV || 'development',
     prefix: process.env.PREFIX || 'api/v1',
     log: process.env.LOG_LEVEL || 'info',
-    host: process.env.HOST || 'http://localhost',
+    host: process.env.HOST,
     frontend: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
   mail: {
