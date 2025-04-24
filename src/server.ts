@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import Fastify from 'fastify';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifySwagger from '@fastify/swagger';
