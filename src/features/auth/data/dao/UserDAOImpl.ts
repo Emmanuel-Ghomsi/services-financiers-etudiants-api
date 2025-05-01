@@ -2,10 +2,10 @@
 import { PrismaClient, RoleEnum, UserStatus } from '@prisma/client';
 import { UserDAO } from './UserDAO';
 import { UserEntity } from '../entity/UserEntity';
-import { RegisterRequest } from '../../presentation/request/RegisterRequest';
+import { RegisterRequest } from '../../presentation/payload/RegisterRequest';
 import { v4 as uuidv4 } from 'uuid';
 import { addHours } from 'date-fns';
-import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export class UserDAOImpl implements UserDAO {
   constructor(private readonly prisma: PrismaClient) {}
@@ -71,6 +71,7 @@ export class UserDAOImpl implements UserDAO {
       where: { id: userId },
       data: {
         password,
+        emailVerified: true,
         firstLoginToken: null,
         firstLoginExpiry: null,
       },

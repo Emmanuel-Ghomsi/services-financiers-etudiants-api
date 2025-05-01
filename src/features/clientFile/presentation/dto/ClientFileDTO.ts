@@ -10,6 +10,7 @@ export interface ClientFileDTO {
   nonResident: boolean;
   status: string;
   creatorId: string;
+  creatorUsername: string | null;
 
   lastName?: string | null;
   firstName?: string | null;

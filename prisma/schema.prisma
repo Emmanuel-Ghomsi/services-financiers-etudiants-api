@@ -189,6 +189,7 @@ model Notification {
   userId    String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  targetUrl String?
 
   user User @relation(fields: [userId], references: [id])
 }

@@ -1,17 +1,17 @@
 /* eslint-disable no-unused-vars */
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
 import { ClientFileEntity } from '../entity/ClientFileEntity';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
-import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { FileStatus } from '@prisma/client';
 
 export interface ClientFileDAO {
@@ -86,4 +86,6 @@ export interface ClientFileDAO {
     pageLimit: number;
   }>;
   updateStatus(id: string, status: FileStatus): Promise<ClientFileEntity>;
+  generateUniqueClientCode(): Promise<string>;
+  generateUniqueReference(): Promise<string>;
 }

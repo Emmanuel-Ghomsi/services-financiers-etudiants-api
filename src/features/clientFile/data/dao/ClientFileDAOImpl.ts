@@ -2,18 +2,19 @@
 import { FileStatus, PrismaClient } from '@prisma/client';
 import { ClientFileDAO } from './ClientFileDAO';
 import { ClientFileEntity } from '../entity/ClientFileEntity';
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
-import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/payload/ClientFileListRequest';
+import { generateClientCode, generateClientReference } from '@core/utils/utils';
 
 export class ClientFileDAOImpl implements ClientFileDAO {
   constructor(private prisma: PrismaClient) {}
@@ -22,9 +23,14 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     data: ClientFileCreateRequest,
     creatorId: string
   ): Promise<ClientFileEntity> {
+    const reference = await this.generateUniqueReference();
+    const clientCode = await this.generateUniqueClientCode();
+
     const created = await this.prisma.clientFile.create({
       data: {
         ...data,
+        reference,
+        clientCode,
         status: 'IN_PROGRESS',
         creatorId,
       },
@@ -105,6 +111,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
   async findById(fileId: string): Promise<ClientFileEntity | null> {
     const file = await this.prisma.clientFile.findUnique({
       where: { id: fileId },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
     return file ? new ClientFileEntity(file) : null;
   }
@@ -113,6 +126,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     const list = await this.prisma.clientFile.findMany({
       where: { creatorId: userId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
     return list.map((f) => new ClientFileEntity(f));
   }
@@ -120,6 +140,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
   async findAll(): Promise<ClientFileEntity[]> {
     const list = await this.prisma.clientFile.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
     });
     return list.map((f) => new ClientFileEntity(f));
   }
@@ -189,6 +216,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
 
     const [items, totalItems] = await Promise.all([
       this.prisma.clientFile.findMany({
+        include: {
+          creator: {
+            select: {
+              username: true,
+            },
+          },
+        },
         where: { creatorId: userId },
         skip,
         take: pageSize,
@@ -198,7 +232,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     ]);
 
     return {
-      items: items as ClientFileEntity[],
+      items: items.map(
+        (item) =>
+          new ClientFileEntity({
+            ...item,
+            creatorUsername: item.creator?.username,
+          })
+      ),
       totalItems,
       currentPage: page,
       totalPages: Math.ceil(totalItems / pageSize),
@@ -238,6 +278,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
 
     const [items, totalItems] = await Promise.all([
       this.prisma.clientFile.findMany({
+        include: {
+          creator: {
+            select: {
+              username: true,
+            },
+          },
+        },
         where,
         skip,
         take: pageSize,
@@ -247,7 +294,13 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     ]);
 
     return {
-      items: items as ClientFileEntity[],
+      items: items.map(
+        (item) =>
+          new ClientFileEntity({
+            ...item,
+            creatorUsername: item.creator?.username,
+          })
+      ),
       totalItems,
       currentPage: page,
       totalPages: Math.ceil(totalItems / pageSize),
@@ -266,5 +319,35 @@ export class ClientFileDAOImpl implements ClientFileDAO {
     });
 
     return new ClientFileEntity(updated);
+  }
+
+  async generateUniqueClientCode(): Promise<string> {
+    let unique = false;
+    let code = '';
+
+    while (!unique) {
+      code = generateClientCode();
+      const existing = await this.prisma.clientFile.findUnique({
+        where: { clientCode: code },
+      });
+      if (!existing) unique = true;
+    }
+
+    return code;
+  }
+
+  async generateUniqueReference(): Promise<string> {
+    let unique = false;
+    let ref = '';
+
+    while (!unique) {
+      ref = generateClientReference();
+      const existing = await this.prisma.clientFile.findUnique({
+        where: { reference: ref },
+      });
+      if (!existing) unique = true;
+    }
+
+    return ref;
   }
 }

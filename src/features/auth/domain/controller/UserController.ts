@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { UserService } from '../service/UserService';
-import { UpdateUserRequest } from '@features/auth/presentation/request/UpdateUserRequest';
-import { ChangeUserStatusRequest } from '@features/auth/presentation/request/ChangeUserStatusRequest';
-import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
-import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
-import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
-import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
+import { UpdateUserRequest } from '@features/auth/presentation/payload/UpdateUserRequest';
+import { ChangeUserStatusRequest } from '@features/auth/presentation/payload/ChangeUserStatusRequest';
+import { AddRoleRequest } from '@features/auth/presentation/payload/AddRoleRequest';
+import { DeleteAccountRequest } from '@features/auth/presentation/payload/DeleteAccountRequest';
+import { UserListRequest } from '@features/auth/presentation/payload/UserListRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export class UserController {
   /**

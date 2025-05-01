@@ -1,26 +1,26 @@
 /* eslint-disable no-unused-vars */
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
 import { ValidationException } from '@core/exceptions/ValidationException';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
 import { ClientFileService } from './ClientFileService';
 import { ClientFileDAO } from '@features/clientFile/data/dao/ClientFileDAO';
 import { toClientFileDTO } from '@features/clientFile/presentation/mapper/ClientFileMapper';
 import { ClientFileEntity } from '@features/clientFile/data/entity/ClientFileEntity';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
 import { UserDAO } from '@features/auth/data/dao/UserDAO';
 import { NotificationService } from '@features/notification/domain/service/NotificationService';
 import { toClientFilePagination } from '@features/clientFile/presentation/mapper/ClientFilePaginationMapper';
-import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { ClientFilePaginationDTO } from '@features/clientFile/presentation/dto/ClientFilePaginationDTO';
 import { FileStatus } from '@prisma/client';
 import { logger } from '@core/config/logger';
@@ -30,6 +30,7 @@ import {
   sendClientFileRejectedEmail,
   sendClientFileSuperAdminValidationEmail,
 } from '@infrastructure/mail/MailProvider';
+import { config } from '@core/config/env';
 
 export class ClientFileServiceImpl implements ClientFileService {
   constructor(
@@ -50,7 +51,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       admins.map((a) => a.id),
       'CLIENT_FILE_CREATED',
       'Nouvelle fiche client',
-      `Référence : ${file.reference}`
+      `Référence : ${file.reference}`,
+      `${config.server.frontend}/clients/${file.id}/view`
     );
     return toClientFileDTO(file);
   }
@@ -210,7 +212,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       superAdmins.map((a) => a.id),
       'CLIENT_FILE_TO_FINAL_VALIDATE',
       'Validation finale requise',
-      `Fiche ${file.reference} à valider définitivement`
+      `Fiche ${file.reference} à valider définitivement`,
+      `${config.server.frontend}/clients/${file.id}/view`
     );
 
     for (const admin of superAdmins) {
@@ -235,7 +238,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       file.creatorId,
       'CLIENT_FILE_VALIDATED',
       'Votre fiche a été validée',
-      `Réf : ${file.reference}`
+      `Référence : ${file.reference}`,
+      `${config.server.frontend}/clients/${file.id}/view`
     );
 
     const dto = toClientFileDTO(file);
@@ -258,7 +262,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       file.creatorId,
       'CLIENT_FILE_REJECTED',
       'Votre fiche a été rejetée',
-      `Réf : ${file.reference} — Raison : ${reason}`
+      `Référence : ${file.reference} — Raison : ${reason}`,
+      `${config.server.frontend}/clients/${file.id}/view`
     );
 
     if (file.email)
@@ -324,7 +329,8 @@ export class ClientFileServiceImpl implements ClientFileService {
         admins.map((a) => a.id),
         'CLIENT_FILE_TO_VALIDATE',
         'Validation fiche client',
-        `Fiche ${reference} à valider`
+        `Fiche ${reference} à valider`,
+        `${config.server.frontend}/clients/${file.id}/view`
       );
 
       for (const admin of admins) {
@@ -336,7 +342,8 @@ export class ClientFileServiceImpl implements ClientFileService {
         superAdmins.map((a) => a.id),
         'CLIENT_FILE_TO_FINAL_VALIDATE',
         'Validation finale requise',
-        `Fiche ${reference} à valider définitivement`
+        `Fiche ${reference} à valider définitivement`,
+        `${config.server.frontend}/clients/${file.id}/view`
       );
 
       for (const admin of superAdmins) {

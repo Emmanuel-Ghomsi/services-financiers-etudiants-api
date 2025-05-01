@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { MediaService } from '../service/MediaService';
-import { GetMediaRequest } from '@features/media/presentation/request/GetMediaRequest';
+import { GetMediaRequest } from '@features/media/presentation/payload/GetMediaRequest';
 
 export class MediaController {
   static async updateUserProfilePicture(

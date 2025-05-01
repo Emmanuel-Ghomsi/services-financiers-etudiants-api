@@ -2,18 +2,18 @@
 import { UserDAO } from '@features/auth/data/dao/UserDAO';
 import { UserService } from './UserService';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
-import { UpdateUserRequest } from '@features/auth/presentation/request/UpdateUserRequest';
-import { ChangeUserStatusRequest } from '@features/auth/presentation/request/ChangeUserStatusRequest';
-import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
-import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
+import { UpdateUserRequest } from '@features/auth/presentation/payload/UpdateUserRequest';
+import { ChangeUserStatusRequest } from '@features/auth/presentation/payload/ChangeUserStatusRequest';
+import { AddRoleRequest } from '@features/auth/presentation/payload/AddRoleRequest';
+import { DeleteAccountRequest } from '@features/auth/presentation/payload/DeleteAccountRequest';
 import { toUserDTO } from '@features/auth/presentation/mapper/UserMapper';
 import {
   sendAccountDeletionRequestEmail,
   sendFirstLoginEmail,
 } from '@infrastructure/mail/MailProvider';
-import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
+import { UserListRequest } from '@features/auth/presentation/payload/UserListRequest';
 import { PaginatedResult } from '@core/base/PaginatedResult';
-import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly userDAO: UserDAO) {}

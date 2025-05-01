@@ -6,12 +6,25 @@ import { NotificationEntity } from '@features/notification/data/entity/Notificat
 export class NotificationService {
   constructor(private dao: NotificationDAO) {}
 
-  async notify(userId: string, type: string, title: string, message: string) {
-    const notif = await this.dao.create({ userId, type, title, message });
+  async notify(
+    userId: string,
+    type: string,
+    title: string,
+    message: string,
+    targetUrl?: string
+  ) {
+    const notif = await this.dao.create({
+      userId,
+      type,
+      title,
+      message,
+      targetUrl,
+    });
     WebSocketRegistry.notifyUser(userId, {
       type,
       title,
       message,
+      targetUrl,
       createdAt: notif.createdAt,
     });
   }
@@ -20,10 +33,11 @@ export class NotificationService {
     userIds: string[],
     type: string,
     title: string,
-    message: string
+    message: string,
+    targetUrl?: string
   ) {
     for (const userId of userIds) {
-      await this.notify(userId, type, title, message);
+      await this.notify(userId, type, title, message, targetUrl);
     }
   }
 

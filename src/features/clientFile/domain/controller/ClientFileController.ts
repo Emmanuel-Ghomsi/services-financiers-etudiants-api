@@ -1,20 +1,20 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ClientFileService } from '../service/ClientFileService';
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
 import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
 import { exportClientFileToWord } from '@infrastructure/export/WordExporter';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
-import { ClientFileListRequestSchema } from '@features/clientFile/presentation/request/ClientFileListRequest';
-import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/request/UpdateClientFileStatusRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
+import { ClientFileListRequestSchema } from '@features/clientFile/presentation/payload/ClientFileListRequest';
+import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
 
 export class ClientFileController {
   static async create(

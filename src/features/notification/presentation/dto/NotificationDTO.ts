@@ -5,4 +5,5 @@ export interface NotificationDTO {
   message: string;
   isRead: boolean;
   createdAt: Date;
+  targetUrl?: string;
 }

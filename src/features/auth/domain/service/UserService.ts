@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { PaginatedResult } from '@core/base/PaginatedResult';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
-import { AddRoleRequest } from '@features/auth/presentation/request/AddRoleRequest';
-import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
-import { ChangeUserStatusRequest } from '@features/auth/presentation/request/ChangeUserStatusRequest';
-import { DeleteAccountRequest } from '@features/auth/presentation/request/DeleteAccountRequest';
-import { UpdateUserRequest } from '@features/auth/presentation/request/UpdateUserRequest';
-import { UserListRequest } from '@features/auth/presentation/request/UserListRequest';
+import { AddRoleRequest } from '@features/auth/presentation/payload/AddRoleRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
+import { ChangeUserStatusRequest } from '@features/auth/presentation/payload/ChangeUserStatusRequest';
+import { DeleteAccountRequest } from '@features/auth/presentation/payload/DeleteAccountRequest';
+import { UpdateUserRequest } from '@features/auth/presentation/payload/UpdateUserRequest';
+import { UserListRequest } from '@features/auth/presentation/payload/UserListRequest';
 
 export interface UserService {
   getPaginatedUsers(

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { UserEntity } from '../entity/UserEntity';
-import { RegisterRequest } from '../../presentation/request/RegisterRequest';
-import { AdminUpdateUserRequest } from '@features/auth/presentation/request/AdminUpdateUserRequest';
+import { RegisterRequest } from '../../presentation/payload/RegisterRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export interface UserDAO {
   createUser(

@@ -8,211 +8,223 @@
         size: A4;
         margin: 2cm;
       }
+
       body {
         font-family: Arial, sans-serif;
         font-size: 11pt;
-        line-height: 1.3;
-        color: #000;
         margin: 0;
         padding: 0;
+        background-image: url('file:///app/src/resources/assets/background.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
       }
-      .header {
-        text-align: right;
-        margin-bottom: 20px;
-        font-weight: bold;
+
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        background-image: url('file:///app/src/resources/assets/logo.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
       }
-      .title {
+
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 70px;
+        background-image: url('file:///app/src/resources/assets/footer.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .content {
+        margin-top: 120px;
+        margin-bottom: 90px;
+        padding: 0 20px;
+      }
+
+      h1 {
         text-align: center;
         font-size: 14pt;
-        font-weight: bold;
-        margin: 20px 0;
         text-transform: uppercase;
+        margin: 30px 0;
       }
-      .client-code {
-        text-align: right;
-        margin-bottom: 15px;
-      }
+
       .section {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
       }
+
       .section-title {
         font-weight: bold;
+        margin: 10px 0;
         text-transform: uppercase;
-        margin-top: 20px;
-        margin-bottom: 10px;
         border-bottom: 1px solid #000;
+        padding-bottom: 4px;
       }
+
       .field-row {
         display: flex;
-        margin-bottom: 5px;
+        margin: 5px 0;
       }
-      .field-label {
-        font-weight: normal;
-        min-width: 200px;
+
+      .label {
+        width: 40%;
+        font-weight: bold;
       }
-      .field-value {
-        flex: 1;
-        border-bottom: 1px dotted #999;
+
+      .value {
+        width: 60%;
+        border-bottom: 1px dotted #333;
         min-height: 15px;
       }
+
       .checkbox-group {
         display: flex;
-        gap: 30px;
-        margin-bottom: 10px;
-      }
-      .checkbox-item {
-        display: flex;
         align-items: center;
-        gap: 5px;
+        margin: 5px 0;
       }
+
       .checkbox {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border: 1px solid #000;
-        display: inline-block;
+        margin-right: 6px;
         position: relative;
       }
+
       .checkbox.checked::after {
         content: '✓';
         position: absolute;
         top: -3px;
-        left: 1px;
-        font-size: 12px;
+        left: 2px;
+        font-size: 14px;
       }
-      .signature-section {
+
+      .signature {
         margin-top: 30px;
-        border: 1px solid #000;
-        padding: 10px;
+        border-top: 1px solid #000;
+        padding-top: 10px;
       }
-      .signature-title {
-        text-align: center;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-      .signature-row {
-        display: flex;
-        margin-bottom: 10px;
-      }
-      .signature-label {
-        width: 100px;
-        font-weight: bold;
-      }
-      .signature-field {
-        flex: 1;
-        border-bottom: 1px solid #999;
-        min-height: 20px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      td {
-        padding: 5px;
+
+      .signature div {
+        margin: 5px 0;
       }
     </style>
   </head>
+
   <body>
-    <div class="header">{{reference}}</div>
+    <header></header>
+    <footer></footer>
+    <div class="content">
+      <h1>Fiche KYC - {{reference}}</h1>
 
-    <div class="title">Fiche KYC Personne Physique – Particuliers</div>
-
-    <div class="client-code">Code client : {{clientCode}}</div>
-
-    <div class="section">
-      <div class="checkbox-group">
-        <div>Motif de la fiche KYC :</div>
-        <div class="checkbox-item">
+      <div class="section">
+        <div class="section-title">Informations de base</div>
+        <div class="field-row">
+          <div class="label">Code client</div>
+          <div class="value">{{clientCode}}</div>
+        </div>
+        <div class="checkbox-group">
+          <div class="label">Motif :</div>
           <div
             class="checkbox {{#if reason == 'Entrée en relation'}}checked{{/if}}"
           ></div>
-          <div>Entrée en relation</div>
-        </div>
-        <div class="checkbox-item">
+          Entrée en relation
           <div
             class="checkbox {{#if reason == 'Revue périodique'}}checked{{/if}}"
+            style="margin-left: 20px"
           ></div>
-          <div>Revue périodique</div>
+          Revue périodique
         </div>
-      </div>
-
-      <div class="checkbox-group">
-        <div>Type de client :</div>
-        <div class="checkbox-item">
+        <div class="checkbox-group">
+          <div class="label">Type de client :</div>
           <div
             class="checkbox {{#if clientType == 'Titulaire'}}checked{{/if}}"
           ></div>
-          <div>Titulaire</div>
-        </div>
-        <div class="checkbox-item">
+          Titulaire
           <div
             class="checkbox {{#if clientType == 'Mandataire'}}checked{{/if}}"
+            style="margin-left: 20px"
           ></div>
-          <div>Mandataire</div>
+          Mandataire
         </div>
-      </div>
-
-      <div class="checkbox-group">
-        <div>Ouverture du compte à un non-Résident :</div>
-        <div class="checkbox-item">
+        <div class="checkbox-group">
+          <div class="label">Non-résident :</div>
+          <div class="checkbox {{#if nonResident == true}}checked{{/if}}"></div>
+          Oui
           <div
             class="checkbox {{#if nonResident == false}}checked{{/if}}"
+            style="margin-left: 20px"
           ></div>
-          <div>Non</div>
-        </div>
-        <div class="checkbox-item">
-          <div class="checkbox {{#if nonResident == true}}checked{{/if}}"></div>
-          <div>Oui</div>
+          Non
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="section-title">Identité du client</div>
+      <div class="section">
+        <div class="section-title">Identité</div>
+        <div class="field-row">
+          <div class="label">Nom</div>
+          <div class="value">{{lastName}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Prénom</div>
+          <div class="value">{{firstName}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Nom de jeune fille</div>
+          <div class="value">{{maidenName}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Date de naissance</div>
+          <div class="value">{{birthDate}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Lieu de naissance</div>
+          <div class="value">{{birthCity}}, {{birthCountry}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Type & Numéro d'identité</div>
+          <div class="value">{{identityType}} / {{identityNumber}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Nationalité</div>
+          <div class="value">{{nationality}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Représentant légal</div>
+          <div class="value">{{legalRepresentative}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">Compte bancaire</div>
+          <div class="value">{{#if hasBankAccount}}Oui{{else}}Non{{/if}}</div>
+        </div>
+        <div class="field-row">
+          <div class="label">N° Fiscal / Pays</div>
+          <div class="value">{{taxIdNumber}} / {{taxCountry}}</div>
+        </div>
+      </div>
 
-      <table>
-        <tr>
-          <td width="50%">
-            <div class="field-row">
-              <div class="field-label">Nom du client :</div>
-              <div class="field-value">{{lastName}}</div>
-            </div>
-          </td>
-          <td width="50%">
-            <div class="field-row">
-              <div class="field-label">Prénoms du client :</div>
-              <div class="field-value">{{firstName}}</div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="field-row">
-              <div class="field-label">Nom de jeune fille :</div>
-              <div class="field-value">{{maidenName}}</div>
-            </div>
-          </td>
-          <td>
-            <div class="field-row">
-              <div class="field-label">Date de naissance :</div>
-              <div class="field-value">{{birthDate}}</div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="field-row">
-              <div class="field-label">Lieu de naissance (ville) :</div>
-              <div class="field-value">{{birthCity}}</div>
-            </div>
-          </td>
-          <td>
-            <div class="field-row">
-              <div class="field-label">Lieu de naissance (pays) :</div>
-              <div class="field-value">{{birthCountry}}</div>
-            </div>
-          </td>
-        </tr>
-      </table>
+      <div class="section-title">Coordonnées</div>
+      <div class="field">
+        <span class="label">Adresse domicile :</span> {{homeAddress}}
+      </div>
+      <div class="field">
+        <span class="label">Adresse postale :</span> {{postalAddress}}
+      </div>
+      <div class="field">
+        <span class="label">Pays de résidence fiscale :</span>
+        {{taxResidenceCountry}}
+      </div>
+      <div class="field">
+        <span class="label">Téléphone :</span> {{phoneNumbers}}
+      </div>
 
       <div class="field-row">
         <div class="field-label">Type de pièce d'identité :</div>

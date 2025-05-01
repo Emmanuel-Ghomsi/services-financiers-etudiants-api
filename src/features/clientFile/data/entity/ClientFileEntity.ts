@@ -9,6 +9,7 @@ export class ClientFileEntity {
   nonResident!: boolean;
   status!: FileStatus;
   creatorId!: string;
+  creatorUsername?: string | null;
 
   lastName?: string | null;
   firstName?: string | null;
