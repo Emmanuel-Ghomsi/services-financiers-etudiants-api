@@ -6,7 +6,7 @@ export class NotificationEntity {
   userId!: string;
   isRead!: boolean;
   createdAt!: Date;
-  targetUrl?: string;
+  targetUrl?: string | null;
 
   constructor(props: Partial<NotificationEntity>) {
     Object.assign(this, props);
