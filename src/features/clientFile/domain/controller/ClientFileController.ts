@@ -10,8 +10,6 @@ import { ClientFileServicesRequest } from '@features/clientFile/presentation/pay
 import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
 import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
 import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
-import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
-import { exportClientFileToWord } from '@infrastructure/export/WordExporter';
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
 import { ClientFileListRequestSchema } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
@@ -226,45 +224,6 @@ export class ClientFileController {
     const userId = req.user?.id;
     await service.updateCompliance(req.params.id, userId, req.body);
     res.send({ message: 'Classification LBC/FT mise à jour' });
-  }
-
-  static async exportPDF(
-    req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply,
-    service: ClientFileService
-  ) {
-    const userId = req.user?.id;
-    const roles = req.user?.roles || [];
-    const file = await service.findById(req.params.id, userId, roles);
-    const buffer = await exportClientFileToPDF(file);
-
-    res.header('Content-Type', 'application/pdf');
-    res.header(
-      'Content-Disposition',
-      `attachment; filename=${file.reference}.pdf`
-    );
-    res.send(buffer);
-  }
-
-  static async exportWord(
-    req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply,
-    service: ClientFileService
-  ) {
-    const userId = req.user?.id;
-    const roles = req.user?.roles || [];
-    const file = await service.findById(req.params.id, userId, roles);
-    const buffer = await exportClientFileToWord(file);
-
-    res.header(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    );
-    res.header(
-      'Content-Disposition',
-      `attachment; filename=${file.reference}.docx`
-    );
-    res.send(buffer);
   }
 
   static async updateFundOrigin(

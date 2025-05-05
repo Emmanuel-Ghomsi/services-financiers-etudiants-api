@@ -255,31 +255,6 @@ export async function registerClientFileRoutes(
       ClientFileController.updateCompliance(req as any, res, service)
   );
 
-  app.get(
-    '/client-files/:id/export/pdf',
-    {
-      preHandler: [app.authenticate],
-      schema: {
-        tags: ['ClientFile'],
-        summary: 'Exporter une fiche client au format PDF',
-      },
-    },
-    async (req, res) => ClientFileController.exportPDF(req as any, res, service)
-  );
-
-  app.get(
-    '/client-files/:id/export/word',
-    {
-      preHandler: [app.authenticate],
-      schema: {
-        tags: ['ClientFile'],
-        summary: 'Exporter une fiche client au format Word',
-      },
-    },
-    async (req, res) =>
-      ClientFileController.exportWord(req as any, res, service)
-  );
-
   app.patch(
     '/client-files/:id/fund-origin',
     {
