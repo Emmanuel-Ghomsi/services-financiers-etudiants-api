@@ -16,6 +16,16 @@ export class UserDAOImpl implements UserDAO {
       firstLoginExpiry: Date;
     }
   ): Promise<UserEntity> {
+    const existing = await this.prisma.user.findUnique({
+      where: { username: data.username },
+    });
+
+    if (existing) {
+      throw new Error(
+        `Un utilisateur avec le nom ${data.username} existe déjà`
+      );
+    }
+
     const created = await this.prisma.user.create({
       data: {
         username: data.username,

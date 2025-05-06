@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { config } from '@core/config/env';
 import { PrismaClient } from '@prisma/client';
-import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { logger } from '@core/config/logger';
 
@@ -102,8 +101,6 @@ export async function sendClientFileFinalValidationEmail(
     return;
   }
 
-  const pdfBuffer = await exportClientFileToPDF(clientFile);
-
   const htmlTemplate = fs.readFileSync(
     path.resolve(
       'src/resources/template/mail/client-file-final-validation.html'
@@ -117,17 +114,10 @@ export async function sendClientFileFinalValidationEmail(
     .replace('{{reference}}', clientFile.reference);
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to: clientFile.email,
     subject: `Votre fiche client est validée - Réf. ${clientFile.reference}`,
     html,
-    attachments: [
-      {
-        filename: `${clientFile.reference}.pdf`,
-        content: pdfBuffer,
-        contentType: 'application/pdf',
-      },
-    ],
   });
 }
 
@@ -145,7 +135,7 @@ export async function sendClientFileAdminValidationEmail(
     .replace('{{reference}}', reference);
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to,
     subject: `Nouvelle fiche à valider - Réf. ${reference}`,
     html,
@@ -166,7 +156,7 @@ export async function sendClientFileSuperAdminValidationEmail(
     .replace('{{reference}}', reference);
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to,
     subject: `Validation finale requise - Réf. ${reference}`,
     html,
@@ -187,7 +177,7 @@ export async function sendClientFileRejectedEmail(
     .replace('{{reason}}', reason);
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to,
     subject: `Fiche client rejetée - Réf. ${reference}`,
     html,
