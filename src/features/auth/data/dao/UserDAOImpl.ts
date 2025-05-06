@@ -16,21 +16,23 @@ export class UserDAOImpl implements UserDAO {
       firstLoginExpiry: Date;
     }
   ): Promise<UserEntity> {
-    const existing = await this.prisma.user.findUnique({
+    // Vérifie si le username existe déjà
+    const existingUser = await this.prisma.user.findUnique({
       where: { username: data.username },
     });
 
-    if (existing) {
+    if (existingUser) {
       throw new Error(
-        `Un utilisateur avec le nom ${data.username} existe déjà`
+        `Un utilisateur avec le nom « ${data.username} » existe déjà.`
       );
     }
 
-    const created = await this.prisma.user.create({
+    // Création du nouvel utilisateur
+    const createdUser = await this.prisma.user.create({
       data: {
         username: data.username,
         email: data.email,
-        password: 'placeholder', // temporairement, mot de passe vide
+        password: 'placeholder', // Mot de passe temporaire
         firstname: '',
         lastname: '',
         phone: '',
@@ -40,9 +42,9 @@ export class UserDAOImpl implements UserDAO {
         firstLoginToken: data.firstLoginToken,
         firstLoginExpiry: data.firstLoginExpiry,
         roles: {
-          create: data.roles.map((role) => ({
+          create: data.roles.map((roleName) => ({
             role: {
-              connect: { name: role },
+              connect: { name: roleName },
             },
           })),
         },
@@ -56,9 +58,10 @@ export class UserDAOImpl implements UserDAO {
       },
     });
 
+    // Mapping en UserEntity
     return new UserEntity({
-      ...created,
-      roles: created.roles.map((r) => r.role.name),
+      ...createdUser,
+      roles: createdUser.roles.map((r) => r.role.name),
     });
   }
 
