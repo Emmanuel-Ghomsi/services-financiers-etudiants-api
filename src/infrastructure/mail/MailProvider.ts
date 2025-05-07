@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const transporter = nodemailer.createTransport({
   host: config.mail.host,
   port: Number(config.mail.port),
-  secure: false,
+  secure: Boolean(config.mail.secure),
   auth: {
     user: config.mail.user,
     pass: config.mail.password,

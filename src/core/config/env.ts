@@ -27,6 +27,7 @@ export const config = {
     host: process.env.SMTP_HOST || 'smtp.example.com',
     port: process.env.SMTP_PORT || 587,
     user: process.env.SMTP_USER || 'user',
+    secure: process.env.SMTP_SECURE || 'false',
     password: process.env.SMTP_PASS || 'password',
     admin:
       process.env.SUPER_ADMIN_EMAIL ||
