@@ -3,210 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Demande de suppression du compte - Services Financiers Etudiants Cameroun
-    </title>
-    <style type="text/css">
-      /* Styles de base pour la compatibilité avec les clients email */
-      body,
-      p,
-      div,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
+    <title>Demande de suppression de compte</title>
+    <style>
+      body {
         margin: 0;
         padding: 0;
-      }
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 16px;
-        line-height: 1.5;
-        color: #333333;
         background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
       }
-      table {
-        border-collapse: collapse;
-        mso-table-lspace: 0pt;
-        mso-table-rspace: 0pt;
-      }
-      img,
-      a img {
-        border: 0;
-        outline: none;
-        text-decoration: none;
-      }
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        margin-bottom: 16px;
-        color: #333333;
-      }
-      p {
-        margin: 0 0 16px 0;
-      }
-      a {
-        color: #0047ab;
-        text-decoration: underline;
-      }
-      /* Styles spécifiques pour ce template */
-      .email-container {
+      .container {
         max-width: 600px;
-        margin: 0 auto;
-      }
-      .email-header {
-        background-color: #0047ab;
-        padding: 20px;
-        text-align: center;
-      }
-      .email-header h1 {
-        color: #ffffff;
-        font-size: 24px;
-        margin: 0;
-      }
-      .email-body {
+        margin: auto;
         background-color: #ffffff;
-        padding: 30px;
+        border-radius: 8px;
+        overflow: hidden;
       }
-      .email-footer {
+      .header {
+        background-color: #0047ab8e;
+        padding: 20px;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+      }
+      .header img {
+        height: 100px;
+        width: 100px;
+      }
+      .header h2 {
+        color: white;
+      }
+      .content {
+        padding: 30px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .footer {
         background-color: #f5f5f5;
         padding: 20px;
         text-align: center;
-        font-size: 14px;
-        color: #666666;
+        font-size: 13px;
+        color: #666;
       }
       .button {
         display: inline-block;
+        padding: 12px 24px;
         background-color: #0047ab;
-        color: #ffffff !important;
-        font-weight: bold;
-        padding: 12px 30px;
-        margin: 20px 0;
-        text-decoration: none;
+        color: #ffffff;
         border-radius: 4px;
-      }
-      @media screen and (max-width: 600px) {
-        .email-container {
-          width: 100% !important;
-        }
-        .email-body {
-          padding: 20px !important;
-        }
+        text-decoration: none;
+        margin-top: 20px;
       }
     </style>
   </head>
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-      font-family: Arial, Helvetica, sans-serif;
-    "
-  >
-    <!-- Début du conteneur principal -->
-    <table
-      border="0"
-      cellpadding="0"
-      cellspacing="0"
-      width="100%"
-      style="min-width: 100%"
-    >
-      <tr>
-        <td align="center" valign="top" style="padding: 30px 0">
-          <!-- Début du conteneur de l'email -->
-          <table
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="600"
-            class="email-container"
-            style="max-width: 600px; margin: 0 auto"
-          >
-            <!-- En-tête de l'email -->
-            <tr>
-              <td
-                align="center"
-                valign="top"
-                class="email-header"
-                style="
-                  background-color: #0047ab;
-                  padding: 20px;
-                  text-align: center;
-                "
-              >
-                <h1 style="color: #ffffff; font-size: 24px; margin: 0">
-                  Services Financiers Etudiants Cameroun
-                </h1>
-              </td>
-            </tr>
-            <!-- Corps de l'email -->
-            <tr>
-              <td
-                align="left"
-                valign="top"
-                class="email-body"
-                style="background-color: #ffffff; padding: 30px"
-              >
-                <p style="margin: 0 0 16px 0">Bonjour,</p>
-
-                <p style="margin: 0 0 16px 0">
-                  L'utilisateur suivant a demandé la suppression de son compte :
-                </p>
-
-                <ul>
-                  <li><strong>Nom :</strong> {{firstname}} {{lastname}}</li>
-                  <li><strong>Email :</strong> {{email}}</li>
-                  <li><strong>Username :</strong> {{username}}</li>
-                </ul>
-
-                <p style="margin: 0 0 16px 0">
-                  <strong>Motif :</strong> {{reason}}
-                </p>
-
-                <p style="margin: 0 0 16px 0">
-                  Merci de traiter cette demande dans les plus brefs délais
-                  depuis la plateforme administrateur.
-                </p>
-
-                <p style="margin: 0 0 16px 0">
-                  Cordialement,<br />L'équipe Services Financiers Etudiants Cameroun
-                </p>
-              </td>
-            </tr>
-            <!-- Pied de page de l'email -->
-            <tr>
-              <td
-                align="center"
-                valign="top"
-                class="email-footer"
-                style="
-                  background-color: #f5f5f5;
-                  padding: 20px;
-                  text-align: center;
-                  font-size: 14px;
-                  color: #666666;
-                "
-              >
-                <p style="margin: 0 0 10px 0">
-                  &copy; 2024 Services Financiers Cameroun &Egrave;tudiants. Tous droits
-                  réservés.
-                </p>
-                <p style="margin: 0">
-                  Cet email a été envoyé automatiquement, merci de ne pas y
-                  répondre.
-                </p>
-              </td>
-            </tr>
-          </table>
-          <!-- Fin du conteneur de l'email -->
-        </td>
-      </tr>
-    </table>
-    <!-- Fin du conteneur principal -->
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="	https://intranet-test.sf-e.ca/_next/image?url=%2Fimages%2Flogo.png&w=256&q=75"
+          alt="Logo SFE Cameroun"
+        />
+        <h2>Services Financiers Etudiants Cameroun</h2>
+      </div>
+      <div class="content">
+        <p>Bonjour,</p>
+        <p>L'utilisateur suivant a demandé la suppression de son compte :</p>
+        <ul>
+          <li><strong>Nom :</strong> {{firstname}} {{lastname}}</li>
+          <li><strong>Email :</strong> {{email}}</li>
+          <li><strong>Username :</strong> {{username}}</li>
+        </ul>
+        <p><strong>Motif :</strong> {{reason}}</p>
+        <p>
+          Merci de traiter cette demande depuis la plateforme administrateur.
+        </p>
+        <p>
+          Cordialement,<br />L’équipe Services Financiers Étudiants Cameroun
+        </p>
+      </div>
+      <div class="footer">
+        &copy; 2025 Services Financiers Étudiants Cameroun. Tous droits
+        réservés.<br />
+        Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+      </div>
+    </div>
   </body>
 </html>

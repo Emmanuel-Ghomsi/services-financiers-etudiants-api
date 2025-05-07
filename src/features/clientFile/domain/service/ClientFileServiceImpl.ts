@@ -234,6 +234,8 @@ export class ClientFileServiceImpl implements ClientFileService {
 
     await this.dao.validateBySuperAdmin(id, validatorId);
 
+    const validator = await this.userDAO.findById(validatorId);
+
     await this.notificationService.notify(
       file.creatorId,
       'CLIENT_FILE_VALIDATED',
@@ -243,7 +245,7 @@ export class ClientFileServiceImpl implements ClientFileService {
     );
 
     const dto = toClientFileDTO(file);
-    await sendClientFileFinalValidationEmail(dto);
+    await sendClientFileFinalValidationEmail(dto, validator);
   }
 
   async reject(id: string, validatorId: string, reason: string): Promise<void> {
@@ -258,6 +260,8 @@ export class ClientFileServiceImpl implements ClientFileService {
 
     await this.dao.reject(id, reason);
 
+    const creator = await this.userDAO.findById(file.creatorId);
+
     await this.notificationService.notify(
       file.creatorId,
       'CLIENT_FILE_REJECTED',
@@ -266,8 +270,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       `${config.server.frontend}/clients/${file.id}/view`
     );
 
-    if (file.email)
-      await sendClientFileRejectedEmail(file.email, file.reference, reason);
+    if (creator && creator.email)
+      await sendClientFileRejectedEmail(creator.email, file.reference, reason);
   }
 
   async updateFundOrigin(

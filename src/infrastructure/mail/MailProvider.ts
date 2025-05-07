@@ -5,6 +5,7 @@ import { config } from '@core/config/env';
 import { PrismaClient } from '@prisma/client';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { logger } from '@core/config/logger';
+import { UserEntity } from '@features/auth/data/entity/UserEntity';
 
 const prisma = new PrismaClient();
 
@@ -95,7 +96,8 @@ export async function sendAccountDeletionRequestEmail(
  * Envoie la fiche client au format PDF par email au client concerné
  */
 export async function sendClientFileFinalValidationEmail(
-  clientFile: ClientFileDTO
+  clientFile: ClientFileDTO,
+  validator: UserEntity | null
 ): Promise<void> {
   if (!clientFile || !clientFile.email) {
     logger.warn('Aucune adresse email liée à la fiche client.');
@@ -112,12 +114,20 @@ export async function sendClientFileFinalValidationEmail(
   const html = htmlTemplate
     .replace('{{firstName}}', clientFile.firstName ?? '')
     .replace('{{lastName}}', clientFile.lastName ?? '')
-    .replace('{{reference}}', clientFile.reference);
+    .replace(
+      '{{validator}}',
+      validator && validator.firstname && validator.lastname
+        ? validator.firstname + ' ' + validator.lastname
+        : ''
+    )
+    .replace('{{date}}', clientFile.createdAt.toDateString())
+    .replace('{{code}}', clientFile.clientCode ?? '');
 
   await transporter.sendMail({
     from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to: clientFile.email,
-    subject: `Votre fiche client est validée - Réf. ${clientFile.reference}`,
+    subject: `Validation de votre profil KYC – SFE CAMEROUN
+ - Réf. ${clientFile.reference}`,
     html,
   });
 }
