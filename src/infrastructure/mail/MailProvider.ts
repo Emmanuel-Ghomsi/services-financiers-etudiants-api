@@ -34,9 +34,10 @@ export async function sendFirstLoginEmail(
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to,
-    subject: 'Définissez votre mot de passe - Services Financiers Étudiants',
+    subject:
+      'Définissez votre mot de passe - Services Financiers Étudiants Cameroun',
     html,
   });
 }
@@ -53,7 +54,7 @@ export async function sendResetPasswordEmail(
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to,
     subject: 'Réinitialisation de votre mot de passe',
     html,
@@ -83,7 +84,7 @@ export async function sendAccountDeletionRequestEmail(
     .replace('{{reason}}', reason);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to: config.mail.admin,
     subject: 'Demande de suppression de compte utilisateur',
     html,
