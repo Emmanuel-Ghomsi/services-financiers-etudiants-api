@@ -287,7 +287,6 @@ export async function registerClientFileRoutes(
     '/client-files/:id/send-pdf',
     {
       schema: {
-        body: zodToSwaggerSchema('SendClientFilePdfByEmailRequest'),
         tags: ['ClientFile'],
         summary: 'Envoyer la fiche cliente en pièce jointe au client',
       },
