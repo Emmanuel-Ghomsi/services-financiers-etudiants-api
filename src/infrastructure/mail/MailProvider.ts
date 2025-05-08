@@ -120,7 +120,7 @@ export async function sendClientFileFinalValidationEmail(
         ? validator.firstname + ' ' + validator.lastname
         : ''
     )
-    .replace('{{date}}', clientFile.createdAt.toDateString())
+    .replace('{{date}}', clientFile.createdAt.toString())
     .replace('{{code}}', clientFile.clientCode ?? '');
 
   await transporter.sendMail({
