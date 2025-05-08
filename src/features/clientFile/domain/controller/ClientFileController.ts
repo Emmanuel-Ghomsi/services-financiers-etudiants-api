@@ -13,7 +13,7 @@ import { ClientFileComplianceRequest } from '@features/clientFile/presentation/p
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
 import { ClientFileListRequestSchema } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
-import { SendClientFilePdfByEmailRequestSchema } from '@features/clientFile/presentation/payload/SendClientFilePdfByEmailRequestSchema';
+import { SendClientFilePdfByEmailRequestSchema } from '@features/clientFile/presentation/payload/SendClientFilePdfByEmailRequest';
 
 export class ClientFileController {
   static async create(
