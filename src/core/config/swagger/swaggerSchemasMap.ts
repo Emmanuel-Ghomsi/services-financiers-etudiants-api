@@ -24,6 +24,7 @@ import { ClientFileOperationRequestSchema } from '@features/clientFile/presentat
 import { ClientFilePepRequestSchema } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
 import { ClientFileServicesRequestSchema } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
 import { ClientFileSituationRequestSchema } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { SendClientFilePdfByEmailRequestSchema } from '@features/clientFile/presentation/payload/SendClientFilePdfByEmailRequestSchema';
 import { UpdateClientFileStatusRequestSchema } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
 import { GetMediaRequestSchema } from '@features/media/presentation/payload/GetMediaRequest';
 import { UpdateProfilePictureRequestSchema } from '@features/media/presentation/payload/UpdateProfilePictureRequest';
@@ -62,6 +63,7 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   ClientFileFundOriginRequest: ClientFileFundOriginRequestSchema,
   ClientFileListRequest: ClientFileListRequestSchema,
   UpdateClientFileStatusRequest: UpdateClientFileStatusRequestSchema,
+  SendClientFilePdfByEmailRequestSchema: SendClientFilePdfByEmailRequestSchema,
 
   // Media
   UpdateProfilePictureRequest: UpdateProfilePictureRequestSchema,

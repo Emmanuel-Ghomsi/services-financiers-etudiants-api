@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { logger } from '@core/config/logger';
 import { UserEntity } from '@features/auth/data/entity/UserEntity';
+import { Buffer } from 'buffer';
 
 const prisma = new PrismaClient();
 
@@ -192,5 +193,36 @@ export async function sendClientFileRejectedEmail(
     to,
     subject: `Fiche client rejetée - Réf. ${reference}`,
     html,
+  });
+}
+
+export async function sendClientKycPdfEmail({
+  to,
+  filename,
+  pdfBuffer,
+  lastName,
+}: {
+  to: string;
+  filename: string;
+  pdfBuffer: Buffer;
+  lastName?: string;
+}): Promise<void> {
+  const filePath = path.resolve(
+    'src/resources/template/mail/client-kyc-send.html'
+  );
+  let html = fs.readFileSync(filePath, 'utf-8');
+  html = html.replace('{{lastName}}', lastName || '');
+
+  await transporter.sendMail({
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
+    to,
+    subject: 'Fiche KYC validée – Services Financiers Étudiants',
+    html,
+    attachments: [
+      {
+        filename,
+        content: pdfBuffer,
+      },
+    ],
   });
 }

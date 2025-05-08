@@ -29,8 +29,10 @@ import {
   sendClientFileFinalValidationEmail,
   sendClientFileRejectedEmail,
   sendClientFileSuperAdminValidationEmail,
+  sendClientKycPdfEmail,
 } from '@infrastructure/mail/MailProvider';
 import { config } from '@core/config/env';
+import { Buffer } from 'buffer';
 
 export class ClientFileServiceImpl implements ClientFileService {
   constructor(
@@ -356,5 +358,22 @@ export class ClientFileServiceImpl implements ClientFileService {
     }
 
     return toClientFileDTO(updatedEntity);
+  }
+
+  async sendUploadedPdfByEmail(
+    clientFileId: string,
+    pdf: Buffer
+  ): Promise<void> {
+    const client = await this.dao.findById(clientFileId);
+    if (!client || !client.email) {
+      throw new Error("Le client ou son email n'existe pas.");
+    }
+
+    await sendClientKycPdfEmail({
+      to: client.email,
+      filename: `Fiche-KYC-${client.reference}.pdf`,
+      pdfBuffer: pdf,
+      lastName: client.lastName || '',
+    });
   }
 }

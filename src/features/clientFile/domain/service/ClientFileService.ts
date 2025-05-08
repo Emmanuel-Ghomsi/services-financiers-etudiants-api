@@ -14,6 +14,7 @@ import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/
 import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
 import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
 import { FileStatus } from '@prisma/client';
+import { Buffer } from 'buffer';
 
 export interface ClientFileService {
   create(data: ClientFileCreateRequest, userId: string): Promise<ClientFileDTO>;
@@ -94,4 +95,5 @@ export interface ClientFileService {
   ): Promise<ClientFilePaginationDTO>;
 
   updateStatus(id: string, status: FileStatus): Promise<ClientFileDTO>;
+  sendUploadedPdfByEmail(clientFileId: string, pdf: Buffer): Promise<void>;
 }

@@ -13,6 +13,7 @@ import { ClientFileComplianceRequest } from '@features/clientFile/presentation/p
 import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
 import { ClientFileListRequestSchema } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
+import { SendClientFilePdfByEmailRequestSchema } from '@features/clientFile/presentation/payload/SendClientFilePdfByEmailRequestSchema';
 
 export class ClientFileController {
   static async create(
@@ -252,5 +253,44 @@ export class ClientFileController {
 
     const updated = await service.updateStatus(fileId, status);
     res.send(updated);
+  }
+
+  static async handleSendPdf(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+    service: ClientFileService
+  ) {
+    const file = await request.file();
+    if (!file) {
+      return reply.status(400).send({
+        error: 'Aucun fichier trouvé',
+        message: 'Le champ de fichier "pdf" est requis.',
+      });
+    }
+    const pdfBuffer = await file.toBuffer();
+
+    const parseResult = SendClientFilePdfByEmailRequestSchema.safeParse({
+      pdf: pdfBuffer,
+    });
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: 'Requête invalide',
+        details: parseResult.error.format(),
+      });
+    }
+
+    try {
+      await service.sendUploadedPdfByEmail(
+        request.params.id,
+        parseResult.data.pdf
+      );
+      reply.status(200).send({ message: 'PDF envoyé avec succès par email' });
+    } catch (error) {
+      request.log.error(error, 'Erreur lors de l’envoi du PDF');
+      reply
+        .status(500)
+        .send({ error: 'Erreur serveur', message: (error as Error).message });
+    }
   }
 }

@@ -282,4 +282,18 @@ export async function registerClientFileRoutes(
     async (req, res) =>
       ClientFileController.updateStatus(req as any, res, service)
   );
+
+  app.post(
+    '/client-files/:id/send-pdf',
+    {
+      schema: {
+        body: zodToSwaggerSchema('SendClientFilePdfByEmailRequest'),
+        tags: ['ClientFile'],
+        summary: 'Envoyer la fiche cliente en pièce jointe au client',
+      },
+      preHandler: [app.authenticate],
+    },
+    async (req, res) =>
+      ClientFileController.handleSendPdf(req as any, res, service)
+  );
 }
