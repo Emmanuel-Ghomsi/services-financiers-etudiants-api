@@ -1,27 +1,38 @@
 /* eslint-disable no-unused-vars */
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
 import { ValidationException } from '@core/exceptions/ValidationException';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
 import { ClientFileService } from './ClientFileService';
 import { ClientFileDAO } from '@features/clientFile/data/dao/ClientFileDAO';
 import { toClientFileDTO } from '@features/clientFile/presentation/mapper/ClientFileMapper';
 import { ClientFileEntity } from '@features/clientFile/data/entity/ClientFileEntity';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
 import { UserDAO } from '@features/auth/data/dao/UserDAO';
 import { NotificationService } from '@features/notification/domain/service/NotificationService';
 import { toClientFilePagination } from '@features/clientFile/presentation/mapper/ClientFilePaginationMapper';
-import { ClientFileListRequest } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFileListRequest } from '@features/clientFile/presentation/payload/ClientFileListRequest';
 import { ClientFilePaginationDTO } from '@features/clientFile/presentation/dto/ClientFilePaginationDTO';
+import { FileStatus } from '@prisma/client';
+import { logger } from '@core/config/logger';
+import {
+  sendClientFileAdminValidationEmail,
+  sendClientFileFinalValidationEmail,
+  sendClientFileRejectedEmail,
+  sendClientFileSuperAdminValidationEmail,
+  sendClientKycPdfEmail,
+} from '@infrastructure/mail/MailProvider';
+import { config } from '@core/config/env';
+import { Buffer } from 'buffer';
 
 export class ClientFileServiceImpl implements ClientFileService {
   constructor(
@@ -42,7 +53,8 @@ export class ClientFileServiceImpl implements ClientFileService {
       admins.map((a) => a.id),
       'CLIENT_FILE_CREATED',
       'Nouvelle fiche client',
-      `Référence : ${file.reference}`
+      `Référence : ${file.reference}`,
+      `${config.server.frontend}/clients/${file.id}/view`
     );
     return toClientFileDTO(file);
   }
@@ -196,6 +208,22 @@ export class ClientFileServiceImpl implements ClientFileService {
     }
 
     await this.dao.validateByAdmin(id, validatorId);
+
+    const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+    await this.notificationService.notifyMany(
+      superAdmins.map((a) => a.id),
+      'CLIENT_FILE_TO_FINAL_VALIDATE',
+      'Validation finale requise',
+      `Fiche ${file.reference} à valider définitivement`,
+      `${config.server.frontend}/clients/${file.id}/view`
+    );
+
+    for (const admin of superAdmins) {
+      await sendClientFileSuperAdminValidationEmail(
+        admin.email,
+        file.reference
+      );
+    }
   }
 
   async validateAsSuperAdmin(id: string, validatorId: string): Promise<void> {
@@ -207,6 +235,19 @@ export class ClientFileServiceImpl implements ClientFileService {
     }
 
     await this.dao.validateBySuperAdmin(id, validatorId);
+
+    const validator = await this.userDAO.findById(validatorId);
+
+    await this.notificationService.notify(
+      file.creatorId,
+      'CLIENT_FILE_VALIDATED',
+      'Votre fiche a été validée',
+      `Référence : ${file.reference}`,
+      `${config.server.frontend}/clients/${file.id}/view`
+    );
+
+    const dto = toClientFileDTO(file);
+    await sendClientFileFinalValidationEmail(dto, validator);
   }
 
   async reject(id: string, validatorId: string, reason: string): Promise<void> {
@@ -215,7 +256,24 @@ export class ClientFileServiceImpl implements ClientFileService {
       throw new ValidationException('Impossible de rejeter cette fiche');
     }
 
+    if (!reason) {
+      throw new ValidationException('Le motif du rejet est obligatoire');
+    }
+
     await this.dao.reject(id, reason);
+
+    const creator = await this.userDAO.findById(file.creatorId);
+
+    await this.notificationService.notify(
+      file.creatorId,
+      'CLIENT_FILE_REJECTED',
+      'Votre fiche a été rejetée',
+      `Référence : ${file.reference} — Raison : ${reason}`,
+      `${config.server.frontend}/clients/${file.id}/view`
+    );
+
+    if (creator && creator.email)
+      await sendClientFileRejectedEmail(creator.email, file.reference, reason);
   }
 
   async updateFundOrigin(
@@ -254,5 +312,68 @@ export class ClientFileServiceImpl implements ClientFileService {
       paginated.pageSize,
       paginated.pageLimit
     );
+  }
+
+  async updateStatus(id: string, status: FileStatus): Promise<ClientFileDTO> {
+    const file = await this.dao.findById(id);
+    if (!file) throw new ResourceNotFoundException('Fiche non trouvée');
+
+    const updatedEntity = await this.dao.updateStatus(id, status);
+
+    const creator = await this.userDAO.findById(file.creatorId);
+
+    if (!creator) {
+      logger.warn(`Aucun utilisateur trouvé pour la fiche ${id}`);
+      return toClientFileDTO(updatedEntity);
+    }
+
+    const reference = file.reference;
+
+    if (status === 'AWAITING_ADMIN_VALIDATION') {
+      const admins = await this.userDAO.findAllByRoles(['ADMIN']);
+      await this.notificationService.notifyMany(
+        admins.map((a) => a.id),
+        'CLIENT_FILE_TO_VALIDATE',
+        'Validation fiche client',
+        `Fiche ${reference} à valider`,
+        `${config.server.frontend}/clients/${file.id}/view`
+      );
+
+      for (const admin of admins) {
+        await sendClientFileAdminValidationEmail(admin.email, reference);
+      }
+    } else if (status === 'AWAITING_SUPERADMIN_VALIDATION') {
+      const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+      await this.notificationService.notifyMany(
+        superAdmins.map((a) => a.id),
+        'CLIENT_FILE_TO_FINAL_VALIDATE',
+        'Validation finale requise',
+        `Fiche ${reference} à valider définitivement`,
+        `${config.server.frontend}/clients/${file.id}/view`
+      );
+
+      for (const admin of superAdmins) {
+        await sendClientFileSuperAdminValidationEmail(admin.email, reference);
+      }
+    }
+
+    return toClientFileDTO(updatedEntity);
+  }
+
+  async sendUploadedPdfByEmail(
+    clientFileId: string,
+    pdf: Buffer
+  ): Promise<void> {
+    const client = await this.dao.findById(clientFileId);
+    if (!client || !client.email) {
+      throw new Error("Le client ou son email n'existe pas.");
+    }
+
+    await sendClientKycPdfEmail({
+      to: client.email,
+      filename: `Fiche-KYC-${client.reference}.pdf`,
+      pdfBuffer: pdf,
+      lastName: client.lastName || '',
+    });
   }
 }

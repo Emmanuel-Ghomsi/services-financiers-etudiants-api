@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { UserEntity } from '../entity/UserEntity';
-import { RegisterRequest } from '../../presentation/request/RegisterRequest';
+import { RegisterRequest } from '../../presentation/payload/RegisterRequest';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export interface UserDAO {
   createUser(
@@ -46,4 +47,12 @@ export interface UserDAO {
   updateProfilePicture(userId: string, url: string): Promise<void>;
   findAllByRoles(roles: string[]): Promise<UserEntity[]>;
   resendFirstLoginToken(email: string): Promise<UserEntity | null>;
+  adminUpdateUser(
+    userId: string,
+    data: AdminUpdateUserRequest
+  ): Promise<UserEntity>;
+  updateProfilePicture(
+    userId: string,
+    profilePicturePath: string
+  ): Promise<void>;
 }

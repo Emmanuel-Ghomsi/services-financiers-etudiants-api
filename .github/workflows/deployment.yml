@@ -1,0 +1,90 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - uat
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔄 Checkout du code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📡 Ajout de l’hôte VPS à known_hosts
+        run: ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Déploiement distant via SSH
+        env:
+          BRANCH: ${{ github.ref_name }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [ "$BRANCH" = "main" ]; then
+            PROJECT_DIR="services-financiers-etudiants-api"
+            ENV_CONTENT="DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_SECURE=${{ secrets.SMTP_SECURE }}
+            SUPER_ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            NODE_ENV=production
+            HOST=${{ secrets.API_HOST }}
+            PORT=2025
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            LOG_LEVEL=info
+            PREFIX=api/v1
+            REDIS_HOST=${{ secrets.REDIS_HOST }}"
+            COMPOSE_FILE="docker-compose.yml"
+          elif [ "$BRANCH" = "uat" ]; then
+            PROJECT_DIR="services-financiers-etudiants-api-uat"
+            ENV_CONTENT="DATABASE_URL=${{ secrets.DATABASE_UAT_URL }}
+            JWT_SECRET=${{ secrets.JWT_UAT_SECRET }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_SECURE=${{ secrets.SMTP_SECURE }}
+            SUPER_ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            NODE_ENV=uat
+            HOST=${{ secrets.API_HOST_UAT }}
+            PORT=2026
+            FRONTEND_URL=${{ secrets.FRONTEND_UAT_URL }}
+            LOG_LEVEL=info
+            PREFIX=api/v1
+            REDIS_HOST=${{ secrets.REDIS_HOST }}"
+            COMPOSE_FILE="docker-compose.uat.yml"
+          else
+            echo "❌ Branche $BRANCH non prévue pour le déploiement"
+            exit 1
+          fi
+
+          echo "🗂️ Projet : $PROJECT_DIR"
+          echo "📄 Fichier compose : $COMPOSE_FILE"
+
+          ssh $VPS_USER@$VPS_HOST << EOF
+            set -e
+            cd $PROJECT_DIR
+
+            echo "🧪 Écriture dynamique du fichier .env"
+            echo "$ENV_CONTENT" > .env
+
+            echo "📥 Pull du dernier code"
+            git pull origin $BRANCH
+
+            echo "🐳 Déploiement avec Docker Compose"
+            docker-compose -f $COMPOSE_FILE up -d --build
+
+            echo "📄 Logs récents (100 lignes) :"
+            docker-compose logs --tail=100
+          EOF

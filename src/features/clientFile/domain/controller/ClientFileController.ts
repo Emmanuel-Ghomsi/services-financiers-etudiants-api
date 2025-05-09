@@ -1,19 +1,18 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ClientFileService } from '../service/ClientFileService';
-import { ClientFileCreateRequest } from '@features/clientFile/presentation/request/ClientFileCreateRequest';
-import { ClientFileIdentityRequest } from '@features/clientFile/presentation/request/ClientFileIdentityRequest';
-import { ClientFileAddressRequest } from '@features/clientFile/presentation/request/ClientFileAddressRequest';
-import { ClientFileActivityRequest } from '@features/clientFile/presentation/request/ClientFileActivityRequest';
-import { ClientFileSituationRequest } from '@features/clientFile/presentation/request/ClientFileSituationRequest';
-import { ClientFileInternationalRequest } from '@features/clientFile/presentation/request/ClientFileInternationalRequest';
-import { ClientFileServicesRequest } from '@features/clientFile/presentation/request/ClientFileServicesRequest';
-import { ClientFileOperationRequest } from '@features/clientFile/presentation/request/ClientFileOperationRequest';
-import { ClientFilePepRequest } from '@features/clientFile/presentation/request/ClientFilePepRequest';
-import { ClientFileComplianceRequest } from '@features/clientFile/presentation/request/ClientFileComplianceRequest';
-import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
-import { exportClientFileToWord } from '@infrastructure/export/WordExporter';
-import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/request/ClientFileFundOriginRequest';
-import { ClientFileListRequestSchema } from '@features/clientFile/presentation/request/ClientFileListRequest';
+import { ClientFileCreateRequest } from '@features/clientFile/presentation/payload/ClientFileCreateRequest';
+import { ClientFileIdentityRequest } from '@features/clientFile/presentation/payload/ClientFileIdentityRequest';
+import { ClientFileAddressRequest } from '@features/clientFile/presentation/payload/ClientFileAddressRequest';
+import { ClientFileActivityRequest } from '@features/clientFile/presentation/payload/ClientFileActivityRequest';
+import { ClientFileSituationRequest } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
+import { ClientFileInternationalRequest } from '@features/clientFile/presentation/payload/ClientFileInternationalRequest';
+import { ClientFileServicesRequest } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
+import { ClientFileOperationRequest } from '@features/clientFile/presentation/payload/ClientFileOperationRequest';
+import { ClientFilePepRequest } from '@features/clientFile/presentation/payload/ClientFilePepRequest';
+import { ClientFileComplianceRequest } from '@features/clientFile/presentation/payload/ClientFileComplianceRequest';
+import { ClientFileFundOriginRequest } from '@features/clientFile/presentation/payload/ClientFileFundOriginRequest';
+import { ClientFileListRequestSchema } from '@features/clientFile/presentation/payload/ClientFileListRequest';
+import { UpdateClientFileStatusRequest } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
 
 export class ClientFileController {
   static async create(
@@ -21,8 +20,11 @@ export class ClientFileController {
     res: FastifyReply,
     service: ClientFileService
   ) {
-    const userId = req.user?.id;
-    const created = await service.create(req.body, userId);
+    if (!req.user?.id) {
+      return res.status(401).send({ message: 'Utilisateur non authentifié' });
+    }
+
+    const created = await service.create(req.body, req.user.id);
     res.code(201).send(created);
   }
 
@@ -35,7 +37,9 @@ export class ClientFileController {
     const roles = req.user?.roles || [];
     const file = await service.findById(req.params.id, userId, roles);
     res.send(file);
-  } /**
+  }
+
+  /**
    * Lister les fiches de l'utilisateur connecté (paginé)
    */
   static async getMyFiles(
@@ -222,45 +226,6 @@ export class ClientFileController {
     res.send({ message: 'Classification LBC/FT mise à jour' });
   }
 
-  static async exportPDF(
-    req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply,
-    service: ClientFileService
-  ) {
-    const userId = req.user?.id;
-    const roles = req.user?.roles || [];
-    const file = await service.findById(req.params.id, userId, roles);
-    const buffer = await exportClientFileToPDF(file);
-
-    res.header('Content-Type', 'application/pdf');
-    res.header(
-      'Content-Disposition',
-      `attachment; filename=${file.reference}.pdf`
-    );
-    res.send(buffer);
-  }
-
-  static async exportWord(
-    req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply,
-    service: ClientFileService
-  ) {
-    const userId = req.user?.id;
-    const roles = req.user?.roles || [];
-    const file = await service.findById(req.params.id, userId, roles);
-    const buffer = await exportClientFileToWord(file);
-
-    res.header(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    );
-    res.header(
-      'Content-Disposition',
-      `attachment; filename=${file.reference}.docx`
-    );
-    res.send(buffer);
-  }
-
   static async updateFundOrigin(
     req: FastifyRequest<{
       Params: { id: string };
@@ -272,5 +237,45 @@ export class ClientFileController {
     const userId = req.user?.id;
     await service.updateFundOrigin(req.params.id, userId, req.body);
     res.send({ message: 'Origine des fonds mise à jour' });
+  }
+
+  static async updateStatus(
+    req: FastifyRequest<{
+      Params: { id: string };
+      Body: UpdateClientFileStatusRequest;
+    }>,
+    res: FastifyReply,
+    service: ClientFileService
+  ) {
+    const fileId = req.params.id;
+    const { status } = req.body;
+
+    const updated = await service.updateStatus(fileId, status);
+    res.send(updated);
+  }
+
+  static async handleSendPdf(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+    service: ClientFileService
+  ) {
+    const file = await request.file();
+    if (!file) {
+      return reply.status(400).send({
+        error: 'Aucun fichier trouvé',
+        message: 'Le champ de fichier "pdf" est requis.',
+      });
+    }
+    const pdfBuffer = await file.toBuffer();
+
+    try {
+      await service.sendUploadedPdfByEmail(request.params.id, pdfBuffer);
+      reply.status(200).send({ message: 'PDF envoyé avec succès par email' });
+    } catch (error) {
+      request.log.error(error, 'Erreur lors de l’envoi du PDF');
+      reply
+        .status(500)
+        .send({ error: 'Erreur serveur', message: (error as Error).message });
+    }
   }
 }

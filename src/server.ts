@@ -1,11 +1,9 @@
-/* eslint-disable no-undef */
 import Fastify from 'fastify';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifySwagger from '@fastify/swagger';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyWebsocket from '@fastify/websocket';
 import { logger, loggerConfig } from '@core/config/logger';
-import { WebSocketRegistry } from '@core/socket/WebSocketRegistry';
 import { config } from '@core/config/env';
 import { GlobalException } from '@core/exceptions/GlobalException';
 import { authenticate } from '@core/middlewares/authenticate';
@@ -14,18 +12,45 @@ import { registerRoutes } from './routes';
 import { registerSchemas } from '@core/config/swagger/registerSchemas';
 import { createDefaultSuperAdmin } from '@scripts/createDefaultSuperAdmin';
 import cors from '@fastify/cors';
+import { seedUserRoles } from '@scripts/seedRoles';
+import fastifyMultipart from '@fastify/multipart';
+import path from 'path';
+import fastifyStatic from '@fastify/static';
+import { registerWebSocketRoutes } from '@core/socket/webSocketRoutes';
 
 const fastify = Fastify({ logger: loggerConfig });
 
 fastify.register(cors, {
-  origin: true,
-  credentials: true,
+  origin: true, // ou ["http://localhost:3000"]
+  credentials: true, // si tu envoies un cookie ou Authorization
+  allowedHeaders: ['Content-Type', 'Authorization'], // important
+  methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+});
+
+fastify.register(fastifyMultipart);
+
+fastify.register(fastifyStatic, {
+  root: path.join(path.resolve(), 'public'),
+  prefix: '/',
 });
 
 // Hook lors de la réception d'une requête
 fastify.addHook('onRequest', (req, reply, done) => {
   req.log.info(`📡 Requête reçue: ${req.method} ${req.url}`);
   done();
+});
+
+// Hook pour activer les logs onSend et onError dans Fastify
+fastify.addHook('onSend', async (request, reply, payload) => {
+  request.log.info(`[${request.method}] ${request.url} -> ${reply.statusCode}`);
+  return payload;
+});
+
+fastify.setErrorHandler((error, request, reply) => {
+  request.log.error({ err: error }, '❌ Erreur dans Fastify');
+  reply.status(error.statusCode || 500).send({
+    message: error.message,
+  });
 });
 
 /**
@@ -61,7 +86,7 @@ fastify.register(fastifyRateLimit, {
   timeWindow: '1 minute',
   cache: 10000,
   keyGenerator: (req) => req.ip,
-  allowList: ['127.0.0.1'], // Autoriser certaines IPs si nécessaire
+  allowList: ['127.0.0.1', '91.108.102.152'], // Autoriser certaines IPs si nécessaire
   errorResponseBuilder: (req, context) => ({
     statusCode: 429,
     error: 'Too Many Requests',
@@ -77,44 +102,25 @@ fastify.decorate('authenticate', authenticate);
 fastify.decorate('authorize', authorize);
 
 fastify.register(fastifyWebsocket);
-
-// Route WebSocket
-fastify.get('/ws', { websocket: true }, (conn, req) => {
-  const user = (req as any).user; // récupéré depuis token ou header auth
-  if (!user || !user.id) {
-    conn.socket.close();
-    return;
-  }
-
-  // Ajouter la connexion au registre
-  WebSocketRegistry.add({
-    socket: conn.socket,
-    userId: user.id,
-  });
-
-  conn.socket.on('close', () => {
-    WebSocketRegistry.remove(conn.socket);
-  });
-
-  // Optionnel : ping de bienvenue
-  conn.socket.send(
-    JSON.stringify({ type: 'CONNECTED', message: 'WebSocket OK ✅' })
-  );
+fastify.register(registerWebSocketRoutes, {
+  prefix: `/${config.server.prefix}`,
 });
 
 // Démarrage du serveur
 export const startServer = async () => {
   try {
+    await seedUserRoles();
     await registerRoutes(fastify);
     await createDefaultSuperAdmin();
-    await fastify.listen({ port: Number(config.server.port) });
-    logger.info(
-      `Server running on ${config.server.host}:${config.server.port}`
-    );
+    await fastify.listen({
+      port: Number(config.server.port),
+      host: '0.0.0.0', // 👈 autorise les connexions depuis toutes les interfaces réseau
+    });
+    logger.info(`Server running on ${config.server.host}`);
     return fastify;
   } catch (error) {
-    logger.error(error);
-    process.exit(1);
+    logger.error('Erreur au démarrage de l’application', error);
+    throw error;
   }
 };
 startServer();

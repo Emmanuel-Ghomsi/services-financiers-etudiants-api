@@ -1,21 +1,22 @@
 services:
-  app:
-    build: .
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: sfe_api
+    restart: unless-stopped
     ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://user:password@db:5432/mydb
-      - JWT_SECRET=mysecret
-    depends_on:
-      - db
+      - '2025:2025'
+    env_file:
+      - .env
+    volumes:
+      - logs-volume:/app/logs
+    networks:
+      - shared-network
 
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
-    ports:
-      - '5432:5432'
+volumes:
+  logs-volume:
+
+networks:
+  shared-network:
+    external: true

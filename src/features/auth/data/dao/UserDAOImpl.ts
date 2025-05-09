@@ -2,9 +2,10 @@
 import { PrismaClient, RoleEnum, UserStatus } from '@prisma/client';
 import { UserDAO } from './UserDAO';
 import { UserEntity } from '../entity/UserEntity';
-import { RegisterRequest } from '../../presentation/request/RegisterRequest';
+import { RegisterRequest } from '../../presentation/payload/RegisterRequest';
 import { v4 as uuidv4 } from 'uuid';
 import { addHours } from 'date-fns';
+import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
 
 export class UserDAOImpl implements UserDAO {
   constructor(private readonly prisma: PrismaClient) {}
@@ -15,11 +16,23 @@ export class UserDAOImpl implements UserDAO {
       firstLoginExpiry: Date;
     }
   ): Promise<UserEntity> {
-    const created = await this.prisma.user.create({
+    // Vérifie si le username existe déjà
+    const existingUser = await this.prisma.user.findUnique({
+      where: { username: data.username },
+    });
+
+    if (existingUser) {
+      throw new Error(
+        `Un utilisateur avec le nom « ${data.username} » existe déjà.`
+      );
+    }
+
+    // Création du nouvel utilisateur
+    const createdUser = await this.prisma.user.create({
       data: {
         username: data.username,
         email: data.email,
-        password: 'placeholder', // temporairement, mot de passe vide
+        password: 'placeholder', // Mot de passe temporaire
         firstname: '',
         lastname: '',
         phone: '',
@@ -29,9 +42,9 @@ export class UserDAOImpl implements UserDAO {
         firstLoginToken: data.firstLoginToken,
         firstLoginExpiry: data.firstLoginExpiry,
         roles: {
-          create: data.roles.map((role) => ({
+          create: data.roles.map((roleName) => ({
             role: {
-              connect: { name: role },
+              connect: { name: roleName },
             },
           })),
         },
@@ -45,9 +58,10 @@ export class UserDAOImpl implements UserDAO {
       },
     });
 
+    // Mapping en UserEntity
     return new UserEntity({
-      ...created,
-      roles: created.roles.map((r) => r.role.name),
+      ...createdUser,
+      roles: createdUser.roles.map((r) => r.role.name),
     });
   }
 
@@ -70,6 +84,7 @@ export class UserDAOImpl implements UserDAO {
       where: { id: userId },
       data: {
         password,
+        emailVerified: true,
         firstLoginToken: null,
         firstLoginExpiry: null,
       },
@@ -172,6 +187,7 @@ export class UserDAOImpl implements UserDAO {
       where: { id: userId },
       data: {
         password,
+        emailVerified: true,
         resetToken: null,
         resetTokenExpiry: null,
       },
@@ -226,7 +242,6 @@ export class UserDAOImpl implements UserDAO {
         lastname: data.lastname,
         phone: data.phone,
         address: data.address,
-        profilePicture: data.profilePicture,
         updatedAt: new Date(),
       },
       include: { roles: { include: { role: true } } },
@@ -265,10 +280,13 @@ export class UserDAOImpl implements UserDAO {
     return (await this.findById(userId)) as UserEntity;
   }
 
-  async updateProfilePicture(userId: string, url: string): Promise<void> {
+  async updateProfilePicture(
+    userId: string,
+    profilePicturePath: string
+  ): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { profilePicture: url },
+      data: { profilePicture: profilePicturePath },
     });
   }
 
@@ -322,6 +340,36 @@ export class UserDAOImpl implements UserDAO {
       firstLoginToken: token,
       firstLoginExpiry: expiry,
       roles: user.roles.map((r) => r.role.name),
+    });
+  }
+
+  async adminUpdateUser(
+    userId: string,
+    data: AdminUpdateUserRequest
+  ): Promise<UserEntity> {
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: userId,
+        OR: [{ firstLoginToken: { not: null } }, { emailVerified: false }],
+      },
+      data: {
+        username: data.username,
+        email: data.email,
+        roles: {
+          deleteMany: {},
+          create: data.roles.map((role) => ({
+            role: { connect: { name: role } },
+          })),
+        },
+      },
+      include: {
+        roles: { include: { role: true } },
+      },
+    });
+
+    return new UserEntity({
+      ...updatedUser,
+      roles: updatedUser.roles.map((r) => r.role.name),
     });
   }
 }

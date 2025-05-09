@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { AuthService } from './AuthService';
-import { RegisterRequest } from '../../presentation/request/RegisterRequest';
+import { RegisterRequest } from '../../presentation/payload/RegisterRequest';
 import { UserEntity } from '../../data/entity/UserEntity';
 import { UserDAO } from '../../data/dao/UserDAO';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,21 +8,21 @@ import {
   sendFirstLoginEmail,
   sendResetPasswordEmail,
 } from '@infrastructure/mail/MailProvider';
-import { SetPasswordRequest } from '@features/auth/presentation/request/SetPasswordRequest';
+import { SetPasswordRequest } from '@features/auth/presentation/payload/SetPasswordRequest';
 import bcrypt from 'bcrypt';
 import { ValidationException } from '@core/exceptions/ValidationException';
 import jwt from 'jsonwebtoken';
-import { LoginRequest } from '@features/auth/presentation/request/LoginRequest';
+import { LoginRequest } from '@features/auth/presentation/payload/LoginRequest';
 import { LoginResponseDTO } from '@features/auth/presentation/dto/LoginResponseDTO';
-import { RefreshTokenRequest } from '@features/auth/presentation/request/RefreshTokenRequest';
+import { RefreshTokenRequest } from '@features/auth/presentation/payload/RefreshTokenRequest';
 import { RefreshTokenResponseDTO } from '@features/auth/presentation/dto/RefreshTokenResponseDTO';
-import { ForgotPasswordRequest } from '@features/auth/presentation/request/ForgotPasswordRequest';
-import { ResetPasswordRequest } from '@features/auth/presentation/request/ResetPasswordRequest';
-import { ChangePasswordRequest } from '@features/auth/presentation/request/ChangePasswordRequest';
+import { ForgotPasswordRequest } from '@features/auth/presentation/payload/ForgotPasswordRequest';
+import { ResetPasswordRequest } from '@features/auth/presentation/payload/ResetPasswordRequest';
+import { ChangePasswordRequest } from '@features/auth/presentation/payload/ChangePasswordRequest';
 import { toUserDTO } from '@features/auth/presentation/mapper/UserMapper';
 import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
 import { config } from '@core/config/env';
-import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/request/ResendFirstLoginEmailRequest';
+import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/payload/ResendFirstLoginEmailRequest';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
 
 /**

@@ -255,31 +255,6 @@ export async function registerClientFileRoutes(
       ClientFileController.updateCompliance(req as any, res, service)
   );
 
-  app.get(
-    '/client-files/:id/export/pdf',
-    {
-      preHandler: [app.authenticate],
-      schema: {
-        tags: ['ClientFile'],
-        summary: 'Exporter une fiche client au format PDF',
-      },
-    },
-    async (req, res) => ClientFileController.exportPDF(req as any, res, service)
-  );
-
-  app.get(
-    '/client-files/:id/export/word',
-    {
-      preHandler: [app.authenticate],
-      schema: {
-        tags: ['ClientFile'],
-        summary: 'Exporter une fiche client au format Word',
-      },
-    },
-    async (req, res) =>
-      ClientFileController.exportWord(req as any, res, service)
-  );
-
   app.patch(
     '/client-files/:id/fund-origin',
     {
@@ -292,5 +267,32 @@ export async function registerClientFileRoutes(
     },
     async (req, res) =>
       ClientFileController.updateFundOrigin(req as any, res, service)
+  );
+
+  app.patch(
+    '/client-files/:id/status',
+    {
+      schema: {
+        body: zodToSwaggerSchema('UpdateClientFileStatusRequest'),
+        tags: ['ClientFile'],
+        summary: 'Modifier le statut d’une fiche client',
+      },
+      preHandler: [app.authenticate],
+    },
+    async (req, res) =>
+      ClientFileController.updateStatus(req as any, res, service)
+  );
+
+  app.post(
+    '/client-files/:id/send-pdf',
+    {
+      schema: {
+        tags: ['ClientFile'],
+        summary: 'Envoyer la fiche cliente en pièce jointe au client',
+      },
+      preHandler: [app.authenticate],
+    },
+    async (req, res) =>
+      ClientFileController.handleSendPdf(req as any, res, service)
   );
 }

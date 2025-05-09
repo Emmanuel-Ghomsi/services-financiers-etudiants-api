@@ -10,4 +10,16 @@ declare module 'fastify' {
   interface FastifyRequest {
     user?: any;
   }
+
+  interface FastifyReply {
+    sendFile(filename: string, rootPath?: string): FastifyReply;
+  }
+  interface FastifyRequest {
+    user: {
+      id: string;
+      username: string;
+      email: string;
+      roles: string[];
+    };
+  }
 }

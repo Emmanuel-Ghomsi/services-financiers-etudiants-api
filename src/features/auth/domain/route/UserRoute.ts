@@ -59,9 +59,10 @@ export async function registerUserRoutes(
     '/user/:id',
     {
       schema: {
-        body: zodToSwaggerSchema('UpdateUserRequest'),
+        body: zodToSwaggerSchema('AdminUpdateUserRequest'),
         tags: ['User'],
-        summary: 'Admin - Modifier un utilisateur',
+        summary:
+          'Modifier un utilisateur avant sa première connexion ou validation email',
       },
       preHandler: [app.authenticate, app.authorize(['SUPER_ADMIN', 'ADMIN'])],
     },

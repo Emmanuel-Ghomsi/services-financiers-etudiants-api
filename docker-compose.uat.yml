@@ -1,0 +1,22 @@
+services:
+  api_uat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.uat
+    container_name: sfe_api_uat
+    restart: unless-stopped
+    ports:
+      - '2026:2026'
+    env_file:
+      - .env
+    volumes:
+      - logs-volume:/app/logs
+    networks:
+      - shared-network
+
+volumes:
+  logs-volume:
+
+networks:
+  shared-network:
+    external: true

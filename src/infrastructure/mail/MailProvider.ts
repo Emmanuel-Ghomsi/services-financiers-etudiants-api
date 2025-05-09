@@ -3,16 +3,17 @@ import fs from 'fs';
 import path from 'path';
 import { config } from '@core/config/env';
 import { PrismaClient } from '@prisma/client';
-import { exportClientFileToPDF } from '@infrastructure/export/PdfExporter';
 import { ClientFileDTO } from '@features/clientFile/presentation/dto/ClientFileDTO';
 import { logger } from '@core/config/logger';
+import { UserEntity } from '@features/auth/data/entity/UserEntity';
+import { Buffer } from 'buffer';
 
 const prisma = new PrismaClient();
 
 const transporter = nodemailer.createTransport({
   host: config.mail.host,
   port: Number(config.mail.port),
-  secure: false,
+  secure: Boolean(config.mail.secure),
   auth: {
     user: config.mail.user,
     pass: config.mail.password,
@@ -28,16 +29,17 @@ export async function sendFirstLoginEmail(
   to: string,
   token: string
 ): Promise<void> {
-  const filePath = path.resolve('resources/template/mail/first-login.html');
+  const filePath = path.resolve('src/resources/template/mail/first-login.html');
   let html = fs.readFileSync(filePath, 'utf-8');
 
   const link = `${config.server.frontend}/auth/set-password?token=${token}`;
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to,
-    subject: 'Définissez votre mot de passe - Services Financiers Étudiants',
+    subject:
+      'Définissez votre mot de passe - Services Financiers Étudiants Cameroun',
     html,
   });
 }
@@ -47,14 +49,14 @@ export async function sendResetPasswordEmail(
   token: string
 ): Promise<void> {
   let html = fs.readFileSync(
-    'resources/template/mail/reset-password.html',
+    'src/resources/template/mail/reset-password.html',
     'utf-8'
   );
   const link = `${config.server.frontend}/auth/reset-password?token=${token}`;
   html = html.replace('{{link}}', link);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to,
     subject: 'Réinitialisation de votre mot de passe',
     html,
@@ -72,7 +74,7 @@ export async function sendAccountDeletionRequestEmail(
   if (!user) return;
 
   const htmlTemplate = fs.readFileSync(
-    path.resolve('resources/template/mail/delete-account-request.html'),
+    path.resolve('src/resources/template/mail/delete-account-request.html'),
     'utf-8'
   );
 
@@ -84,7 +86,7 @@ export async function sendAccountDeletionRequestEmail(
     .replace('{{reason}}', reason);
 
   await transporter.sendMail({
-    from: '"Services Financiers Étudiants" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
     to: config.mail.admin,
     subject: 'Demande de suppression de compte utilisateur',
     html,
@@ -95,35 +97,131 @@ export async function sendAccountDeletionRequestEmail(
  * Envoie la fiche client au format PDF par email au client concerné
  */
 export async function sendClientFileFinalValidationEmail(
-  clientFile: ClientFileDTO
+  clientFile: ClientFileDTO,
+  validator: UserEntity | null
 ): Promise<void> {
   if (!clientFile || !clientFile.email) {
     logger.warn('Aucune adresse email liée à la fiche client.');
     return;
   }
 
-  const pdfBuffer = await exportClientFileToPDF(clientFile);
-
   const htmlTemplate = fs.readFileSync(
-    path.resolve('resources/template/mail/client-file-final-validation.html'),
+    path.resolve(
+      'src/resources/template/mail/client-file-final-validation.html'
+    ),
     'utf-8'
   );
 
   const html = htmlTemplate
     .replace('{{firstName}}', clientFile.firstName ?? '')
     .replace('{{lastName}}', clientFile.lastName ?? '')
-    .replace('{{reference}}', clientFile.reference);
+    .replace(
+      '{{validator}}',
+      validator && validator.firstname && validator.lastname
+        ? validator.firstname + ' ' + validator.lastname
+        : ''
+    )
+    .replace('{{date}}', clientFile.createdAt.toString())
+    .replace('{{code}}', clientFile.clientCode ?? '');
 
   await transporter.sendMail({
-    from: '"Service Financier Cameroon" <no-reply@sf-e.ca>',
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
     to: clientFile.email,
-    subject: `Votre fiche client est validée - Réf. ${clientFile.reference}`,
+    subject: `Validation de votre profil KYC – SFE CAMEROUN
+ - Réf. ${clientFile.reference}`,
+    html,
+  });
+}
+
+export async function sendClientFileAdminValidationEmail(
+  to: string,
+  reference: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve(
+        'src/resources/template/mail/client-file-awaiting-admin.html'
+      ),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference);
+
+  await transporter.sendMail({
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
+    to,
+    subject: `Nouvelle fiche à valider - Réf. ${reference}`,
+    html,
+  });
+}
+
+export async function sendClientFileSuperAdminValidationEmail(
+  to: string,
+  reference: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve(
+        'src/resources/template/mail/client-file-awaiting-superadmin.html'
+      ),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference);
+
+  await transporter.sendMail({
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
+    to,
+    subject: `Validation finale requise - Réf. ${reference}`,
+    html,
+  });
+}
+
+export async function sendClientFileRejectedEmail(
+  to: string,
+  reference: string,
+  reason: string
+) {
+  const html = fs
+    .readFileSync(
+      path.resolve('src/resources/template/mail/client-file-rejected.html'),
+      'utf-8'
+    )
+    .replace('{{reference}}', reference)
+    .replace('{{reason}}', reason);
+
+  await transporter.sendMail({
+    from: '"Services Financiers Etudiants Cameroun" <no-reply@sf-e.ca>',
+    to,
+    subject: `Fiche client rejetée - Réf. ${reference}`,
+    html,
+  });
+}
+
+export async function sendClientKycPdfEmail({
+  to,
+  filename,
+  pdfBuffer,
+  lastName,
+}: {
+  to: string;
+  filename: string;
+  pdfBuffer: Buffer;
+  lastName?: string;
+}): Promise<void> {
+  const filePath = path.resolve(
+    'src/resources/template/mail/client-kyc-send.html'
+  );
+  let html = fs.readFileSync(filePath, 'utf-8');
+  html = html.replace('{{lastName}}', lastName || '');
+
+  await transporter.sendMail({
+    from: '"Services Financiers Étudiants Cameroun" <no-reply@sf-e.ca>',
+    to,
+    subject: 'Fiche KYC validée – Services Financiers Étudiants',
     html,
     attachments: [
       {
-        filename: `${clientFile.reference}.pdf`,
+        filename,
         content: pdfBuffer,
-        contentType: 'application/pdf',
       },
     ],
   });

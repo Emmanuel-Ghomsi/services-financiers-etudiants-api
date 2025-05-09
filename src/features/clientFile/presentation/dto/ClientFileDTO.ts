@@ -9,12 +9,14 @@ export interface ClientFileDTO {
   clientType: string;
   nonResident: boolean;
   status: string;
+  creatorId: string;
+  creatorUsername: string | null;
 
   lastName?: string | null;
   firstName?: string | null;
   email?: string | null;
   maidenName?: string | null;
-  birthDate?: Date | null;
+  birthDate?: string | null;
   birthCity?: string | null;
   birthCountry?: string | null;
   identityType?: string | null;
@@ -32,7 +34,7 @@ export interface ClientFileDTO {
 
   profession?: string | null;
   businessSector?: string | null;
-  activityStartDate?: Date | null;
+  activityStartDate?: string | null;
   activityArea?: string | null;
 
   incomeSources?: string | null;
@@ -53,11 +55,11 @@ export interface ClientFileDTO {
   isPEP?: boolean | null;
   pepType?: string | null;
   pepMandate?: string | null;
-  pepEndDate?: Date | null;
+  pepEndDate?: string | null;
   pepLinkType?: string | null;
   pepLastName?: string | null;
   pepFirstName?: string | null;
-  pepBirthDate?: Date | null;
+  pepBirthDate?: string | null;
   pepBirthPlace?: string | null;
 
   riskLevel?: string | null;
@@ -69,8 +71,8 @@ export interface ClientFileDTO {
 
   validatorAdminId?: string | null;
   validatorSuperAdminId?: string | null;
-  validationDateAdmin?: Date | null;
-  validationDateSuper?: Date | null;
+  validationDateAdmin?: string | null;
+  validationDateSuper?: string | null;
   rejectionReason?: string | null;
 
   fundSources?: string[] | null;
@@ -78,6 +80,6 @@ export interface ClientFileDTO {
   fundProviderRelation?: string | null;
   fundDonationExplanation?: string | null;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

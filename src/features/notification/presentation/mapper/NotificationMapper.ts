@@ -12,5 +12,6 @@ export function toNotificationDTO(entity: NotificationEntity): NotificationDTO {
     message: entity.message,
     isRead: entity.isRead,
     createdAt: entity.createdAt,
+    targetUrl: entity.targetUrl,
   };
 }
