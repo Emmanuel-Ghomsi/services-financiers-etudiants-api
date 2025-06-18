@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { DashboardService } from '../service/DashboardService';
 
 export class DashboardController {
+  constructor(private readonly dashboardService: DashboardService) {}
+
   static async globalDashboard(
     req: FastifyRequest,
     res: FastifyReply,
@@ -26,5 +29,27 @@ export class DashboardController {
     }
 
     return res.status(403).send({ message: 'Rôle non autorisé' });
+  }
+
+  async getSummary(request: FastifyRequest, reply: FastifyReply) {
+    const summary = await this.dashboardService.getSummary();
+    return reply.send(summary);
+  }
+
+  async getSalaryEvolution(request: FastifyRequest, reply: FastifyReply) {
+    const { year } = request.query as { year: string };
+    const data = await this.dashboardService.getMonthlySalaryEvolution(
+      parseInt(year)
+    );
+    return reply.send(data);
+  }
+
+  async getExpenseDistribution(request: FastifyRequest, reply: FastifyReply) {
+    const { year, month } = request.query as { year: string; month?: string };
+    const data = await this.dashboardService.getExpenseDistribution(
+      parseInt(year),
+      month ? parseInt(month) : undefined
+    );
+    return reply.send(data);
   }
 }

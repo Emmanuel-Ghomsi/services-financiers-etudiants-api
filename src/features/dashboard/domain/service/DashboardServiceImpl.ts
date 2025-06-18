@@ -6,12 +6,14 @@ import { DashboardAdminDAO } from '@features/dashboard/data/dao/DashboardAdminDA
 import { DashboardService } from './DashboardService';
 import { DashboardAdvisorDTO } from '@features/dashboard/presentation/dto/DashboardAdvisorDTO';
 import { DashboardAdvisorDAO } from '@features/dashboard/data/dao/DashboardAdvisorDAO';
+import { DashboardDAO } from '@features/dashboard/data/dao/DashboardDAO';
 
 export class DashboardServiceImpl implements DashboardService {
   constructor(
     private readonly superAdminDao: DashboardSuperAdminDAO,
     private readonly adminDao: DashboardAdminDAO,
-    private readonly advisorDao: DashboardAdvisorDAO
+    private readonly advisorDao: DashboardAdvisorDAO,
+    private readonly dao: DashboardDAO
   ) {}
 
   async getSuperAdminStatistics(): Promise<DashboardSuperAdminDTO> {
@@ -38,5 +40,30 @@ export class DashboardServiceImpl implements DashboardService {
       filesCreatedByMe: await this.advisorDao.getFilesCreatedBy(userId),
       filesValidated: await this.advisorDao.getValidatedFilesCreatedBy(userId),
     };
+  }
+
+  async getSummary() {
+    const [totalSalaries, pendingAdvances, monthlyExpenses, activeLeaves] =
+      await Promise.all([
+        this.dao.getTotalSalariesThisMonth(),
+        this.dao.getPendingAdvancesCount(),
+        this.dao.getMonthlyExpensesTotal(),
+        this.dao.getActiveLeavesCount(),
+      ]);
+
+    return { totalSalaries, pendingAdvances, monthlyExpenses, activeLeaves };
+  }
+
+  async getMonthlySalaryEvolution(
+    year: number
+  ): Promise<{ month: number; total: number }[]> {
+    return this.dao.getMonthlySalaryEvolution(year);
+  }
+
+  async getExpenseDistribution(
+    year: number,
+    month?: number
+  ): Promise<{ category: string; total: number }[]> {
+    return this.dao.getExpenseDistribution(year, month);
   }
 }

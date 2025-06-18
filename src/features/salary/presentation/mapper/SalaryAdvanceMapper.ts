@@ -1,0 +1,17 @@
+import { SalaryAdvanceEntity } from '@features/salary/data/entity/SalaryAdvanceEntity';
+import { SalaryAdvanceDTO } from '../dto/SalaryAdvanceDTO';
+
+export function toSalaryAdvanceDTO(
+  entity: SalaryAdvanceEntity
+): SalaryAdvanceDTO {
+  return {
+    id: entity.id!,
+    amount: entity.amount,
+    reason: entity.reason,
+    requestedDate: entity.requestedDate,
+    status: entity.status,
+    employeeId: entity.employeeId,
+    createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
+  };
+}

@@ -7,4 +7,17 @@ export interface DashboardService {
   getSuperAdminStatistics(): Promise<DashboardSuperAdminDTO>;
   getAdminStatistics(userId: string): Promise<DashboardAdminDTO>;
   getAdvisorStatistics(userId: string): Promise<DashboardAdvisorDTO>;
+  getSummary(): Promise<{
+    totalSalaries: number;
+    pendingAdvances: number;
+    monthlyExpenses: number;
+    activeLeaves: number;
+  }>;
+  getMonthlySalaryEvolution(
+    year: number
+  ): Promise<{ month: number; total: number }[]>;
+  getExpenseDistribution(
+    year: number,
+    month?: number
+  ): Promise<{ category: string; total: number }[]>;
 }
