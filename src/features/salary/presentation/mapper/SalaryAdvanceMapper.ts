@@ -8,10 +8,10 @@ export function toSalaryAdvanceDTO(
     id: entity.id!,
     amount: entity.amount,
     reason: entity.reason,
-    requestedDate: entity.requestedDate,
+    requestedDate: entity.requestedDate.toISOString(),
     status: entity.status,
     employeeId: entity.employeeId,
-    createdAt: entity.createdAt,
-    updatedAt: entity.updatedAt,
+    createdAt: entity.createdAt.toISOString(),
+    updatedAt: entity.updatedAt.toISOString(),
   };
 }

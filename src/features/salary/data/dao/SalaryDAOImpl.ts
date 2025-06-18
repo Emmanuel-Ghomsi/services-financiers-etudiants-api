@@ -35,6 +35,8 @@ export class SalaryDAOImpl implements SalaryDAO {
         paymentMode: data.paymentMode as SalaryPaymentMode,
         paymentDate: data.paymentDate!,
         payslipUrl: data.payslipUrl ?? null,
+        year: data.year!,
+        month: data.month!,
       },
     });
     return this.toEntity(created);
