@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { DashboardService } from '../service/DashboardService';
 
