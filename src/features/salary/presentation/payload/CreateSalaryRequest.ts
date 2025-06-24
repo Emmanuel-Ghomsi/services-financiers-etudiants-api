@@ -1,5 +1,5 @@
+import { SalaryPaymentMode } from '@prisma/client';
 import { z } from 'zod';
-import { SalaryPaymentMode } from '@core/config/enums/SalaryPaymentMode';
 
 export const CreateSalaryRequestSchema = z.object({
   employeeId: z.string().uuid(),

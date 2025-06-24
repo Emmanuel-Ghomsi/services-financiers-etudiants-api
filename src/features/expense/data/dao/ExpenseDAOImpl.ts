@@ -124,7 +124,7 @@ export class ExpenseDAOImpl implements ExpenseDAO {
       AND: [
         filters.startDate ? { date: { gte: filters.startDate } } : undefined,
         filters.endDate ? { date: { lte: filters.endDate } } : undefined,
-        filters.category ? { category: filters.category } : undefined, // ✅ enum attendu
+        filters.category ? { category: filters.category } : undefined,
         filters.employeeId ? { employeeId: filters.employeeId } : undefined,
         filters.projectId ? { projectId: filters.projectId } : undefined,
       ].filter(Boolean) as Prisma.ExpenseWhereInput[],

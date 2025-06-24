@@ -25,6 +25,15 @@ export class SalaryDAOImpl implements SalaryDAO {
   }
 
   async create(data: Partial<SalaryEntity>): Promise<SalaryEntity> {
+    const rawDate = new Date(data.paymentDate!);
+
+    if (isNaN(rawDate.getTime())) {
+      throw new Error(`Invalid paymentDate: ${data.paymentDate}`);
+    }
+
+    const year = rawDate.getFullYear().toString();
+    const month = (rawDate.getMonth() + 1).toString().padStart(2, '0');
+
     const created = await this.prisma.salary.create({
       data: {
         employeeId: data.employeeId!,
@@ -33,12 +42,13 @@ export class SalaryDAOImpl implements SalaryDAO {
         advances: data.advances!,
         netSalary: data.netSalary!,
         paymentMode: data.paymentMode as SalaryPaymentMode,
-        paymentDate: data.paymentDate!,
+        paymentDate: rawDate,
         payslipUrl: data.payslipUrl ?? null,
-        year: data.year!,
-        month: data.month!,
+        year,
+        month,
       },
     });
+
     return this.toEntity(created);
   }
 

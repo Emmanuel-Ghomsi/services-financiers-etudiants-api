@@ -372,4 +372,16 @@ export class UserDAOImpl implements UserDAO {
       roles: updatedUser.roles.map((r) => r.role.name),
     });
   }
+
+  async removeRolesFromUser(
+    userId: string,
+    roleNames: string[]
+  ): Promise<void> {
+    await this.prisma.userToRole.deleteMany({
+      where: {
+        userId,
+        role: { name: { in: roleNames as RoleEnum[] } },
+      },
+    });
+  }
 }

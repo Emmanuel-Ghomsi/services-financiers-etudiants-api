@@ -55,4 +55,5 @@ export interface UserDAO {
     userId: string,
     profilePicturePath: string
   ): Promise<void>;
+  removeRolesFromUser(userId: string, rolesToRemove: string[]): Promise<void>;
 }

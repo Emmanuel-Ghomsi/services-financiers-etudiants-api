@@ -14,6 +14,7 @@ import {
 import { UserListRequest } from '@features/auth/presentation/payload/UserListRequest';
 import { PaginatedResult } from '@core/base/PaginatedResult';
 import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
+import { RoleEnum } from '@prisma/client';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly userDAO: UserDAO) {}
@@ -88,8 +89,31 @@ export class UserServiceImpl implements UserService {
   }
 
   async addRole(userId: string, data: AddRoleRequest): Promise<UserDTO> {
-    const updated = await this.userDAO.addRoleToUser(userId, data.role);
-    return toUserDTO(updated);
+    // Récupérer les rôles actuels de l'utilisateur
+    const user = await this.userDAO.findById(userId);
+    const currentRoles = user?.roles.map((r) => r) || [];
+
+    const requestedRoles = data.roles;
+    const rolesToAdd = requestedRoles.filter(
+      (role) => !currentRoles.includes(role)
+    );
+    const rolesToRemove = currentRoles.filter(
+      (role) => !requestedRoles.includes(role as RoleEnum)
+    );
+
+    // Ajouter les nouveaux rôles
+    for (const role of rolesToAdd) {
+      await this.userDAO.addRoleToUser(userId, role);
+    }
+
+    // Supprimer les anciens rôles non souhaités
+    if (rolesToRemove.length > 0) {
+      await this.userDAO.removeRolesFromUser(userId, rolesToRemove);
+    }
+
+    // Retourner l’utilisateur mis à jour
+    const updated = await this.userDAO.findById(userId);
+    return toUserDTO(updated!);
   }
 
   async requestDeleteAccount(

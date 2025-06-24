@@ -35,8 +35,11 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
     return results.map((s) => new SalaryAdvanceEntity(s));
   }
 
-  async updateStatus(id: string, status: SalaryAdvanceStatus): Promise<void> {
-    await this.prisma.salaryAdvance.update({
+  async updateStatus(
+    id: string,
+    status: SalaryAdvanceStatus
+  ): Promise<SalaryAdvanceEntity> {
+    return await this.prisma.salaryAdvance.update({
       where: { id },
       data: { status },
     });
@@ -63,5 +66,32 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
     });
 
     return results.reduce((sum, adv) => sum + adv.amount, 0);
+  }
+
+  async findAll(): Promise<SalaryAdvanceEntity[]> {
+    const results = await this.prisma.salaryAdvance.findMany({
+      orderBy: { requestedDate: 'desc' },
+    });
+    return results.map((s) => new SalaryAdvanceEntity(s));
+  }
+
+  async update(
+    id: string,
+    data: Partial<SalaryAdvanceEntity>
+  ): Promise<SalaryAdvanceEntity> {
+    const updated = await this.prisma.salaryAdvance.update({
+      where: { id },
+      data: {
+        amount: data.amount,
+        reason: data.reason,
+        requestedDate: data.requestedDate,
+        status: data.status,
+      },
+    });
+    return new SalaryAdvanceEntity(updated);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.salaryAdvance.delete({ where: { id } });
   }
 }

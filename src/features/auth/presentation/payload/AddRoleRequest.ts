@@ -5,7 +5,7 @@ import { RoleEnum } from '@prisma/client';
  * Requête pour ajouter un rôle à un utilisateur
  */
 export const AddRoleRequestSchema = z.object({
-  role: z.nativeEnum(RoleEnum, {
+  roles: z.array(z.nativeEnum(RoleEnum), {
     errorMap: () => ({ message: 'Rôle invalide' }),
   }),
 });

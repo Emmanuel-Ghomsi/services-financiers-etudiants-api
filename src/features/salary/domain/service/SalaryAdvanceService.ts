@@ -8,11 +8,17 @@ export interface SalaryAdvanceService {
   updateStatus(
     id: string,
     data: UpdateSalaryAdvanceStatusRequest
-  ): Promise<void>;
+  ): Promise<SalaryAdvanceDTO>;
   getEmployeeHistory(employeeId: string): Promise<SalaryAdvanceDTO[]>;
   getApprovedAdvanceTotal(
     employeeId: string,
     year: string,
     month: string
   ): Promise<number>;
+  findAll(): Promise<SalaryAdvanceDTO[]>;
+  update(
+    id: string,
+    data: Partial<SalaryAdvanceDTO>
+  ): Promise<SalaryAdvanceDTO>;
+  delete(id: string): Promise<void>;
 }

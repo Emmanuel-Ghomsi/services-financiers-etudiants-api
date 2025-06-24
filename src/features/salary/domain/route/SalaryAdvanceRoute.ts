@@ -53,7 +53,7 @@ export async function registerSalaryAdvanceRoutes(
         properties: {
           employeeId: { type: 'string', format: 'uuid' },
         },
-        required: ['id'],
+        required: ['employeeId'],
       },
       response: { 200: { type: 'array', items: { $ref: 'SalaryAdvanceDTO' } } },
     },
@@ -83,5 +83,60 @@ export async function registerSalaryAdvanceRoutes(
       },
     },
     handler: controller.getMonthlyApprovedAdvance.bind(controller),
+  });
+
+  server.get('/salary-advances', {
+    schema: {
+      tags: ['Salary Advances'],
+      summary: 'Lister toutes les demandes d’avances',
+      response: { 200: { type: 'array', items: { $ref: 'SalaryAdvanceDTO' } } },
+    },
+    handler: controller.findAll.bind(controller),
+  });
+
+  server.patch('/salary-advances/:id', {
+    schema: {
+      tags: ['Salary Advances'],
+      summary: 'Modifier une avance existante',
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          amount: { type: 'number' },
+          reason: { type: 'string' },
+          requestedDate: { type: 'string', format: 'date' },
+          status: { type: 'string', enum: ['PENDING', 'APPROVED', 'REJECTED'] },
+        },
+      },
+      response: { 200: { $ref: 'SalaryAdvanceDTO' } },
+    },
+    handler: controller.update.bind(controller),
+  });
+
+  server.delete('/salary-advances/:id', {
+    schema: {
+      tags: ['Salary Advances'],
+      summary: 'Supprimer une demande d’avance',
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+      response: {
+        204: {
+          description: 'Suppression réussie',
+          type: 'null',
+        },
+      },
+    },
+    handler: controller.delete.bind(controller),
   });
 }

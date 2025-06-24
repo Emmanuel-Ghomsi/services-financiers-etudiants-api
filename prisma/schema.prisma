@@ -276,8 +276,8 @@ model Salary {
   paymentMode SalaryPaymentMode
   paymentDate DateTime
   payslipUrl  String?
-  year        String
-  month       String
+  year        String            @db.Char(4)
+  month       String            @db.Char(2)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }

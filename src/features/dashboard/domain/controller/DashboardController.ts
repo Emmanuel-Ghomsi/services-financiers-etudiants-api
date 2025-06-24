@@ -3,8 +3,6 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { DashboardService } from '../service/DashboardService';
 
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {}
-
   static async globalDashboard(
     req: FastifyRequest,
     res: FastifyReply,
@@ -31,22 +29,32 @@ export class DashboardController {
     return res.status(403).send({ message: 'Rôle non autorisé' });
   }
 
-  async getSummary(request: FastifyRequest, reply: FastifyReply) {
-    const summary = await this.dashboardService.getSummary();
+  static async getSummary(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const summary = await service.getSummary();
     return reply.send(summary);
   }
 
-  async getSalaryEvolution(request: FastifyRequest, reply: FastifyReply) {
+  static async getSalaryEvolution(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
     const { year } = request.query as { year: string };
-    const data = await this.dashboardService.getMonthlySalaryEvolution(
-      parseInt(year)
-    );
+    const data = await service.getMonthlySalaryEvolution(parseInt(year));
     return reply.send(data);
   }
 
-  async getExpenseDistribution(request: FastifyRequest, reply: FastifyReply) {
+  static async getExpenseDistribution(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
     const { year, month } = request.query as { year: string; month?: string };
-    const data = await this.dashboardService.getExpenseDistribution(
+    const data = await service.getExpenseDistribution(
       parseInt(year),
       month ? parseInt(month) : undefined
     );

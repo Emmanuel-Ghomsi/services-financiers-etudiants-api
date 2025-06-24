@@ -15,11 +15,13 @@ import { toSalaryPdfDataDTO } from '@features/salary/presentation/mapper/SalaryM
 import { SalaryPeriodDTO } from '@features/salary/presentation/dto/SalaryPeriodDTO';
 import { SalaryPeriodPaginationDTO } from '@features/salary/presentation/dto/SalaryPeriodPaginationDTO';
 import { SalaryAdvanceService } from './SalaryAdvanceService';
+import { UserDAO } from '@features/auth/data/dao/UserDAO';
 
 export class SalaryServiceImpl implements SalaryService {
   constructor(
     private readonly salaryDAO: SalaryDAO,
-    private readonly salaryAdvanceService: SalaryAdvanceService
+    private readonly salaryAdvanceService: SalaryAdvanceService,
+    private readonly userDAO: UserDAO
   ) {}
 
   async createSalary(request: CreateSalaryRequest): Promise<SalaryDTO> {

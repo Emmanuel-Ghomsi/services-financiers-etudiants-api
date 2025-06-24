@@ -4,6 +4,7 @@ import { SalaryAdvanceService } from '../service/SalaryAdvanceService';
 import { zParse } from '@core/utils/utils';
 import { CreateSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/CreateSalaryAdvanceRequest';
 import { UpdateSalaryAdvanceStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryAdvanceStatusRequest';
+import { SalaryAdvanceDTO } from '@features/salary/presentation/dto/SalaryAdvanceDTO';
 
 export class SalaryAdvanceController {
   constructor(private readonly service: SalaryAdvanceService) {}
@@ -17,8 +18,8 @@ export class SalaryAdvanceController {
   async updateStatus(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
     const body = await zParse(request, UpdateSalaryAdvanceStatusRequestSchema);
-    await this.service.updateStatus(id, body);
-    return reply.code(204).send();
+    const result = await this.service.updateStatus(id, body);
+    return reply.code(204).send(result);
   }
 
   async getEmployeeHistory(request: FastifyRequest, reply: FastifyReply) {
@@ -43,5 +44,23 @@ export class SalaryAdvanceController {
       month
     );
     return reply.send({ total });
+  }
+
+  async findAll(request: FastifyRequest, reply: FastifyReply) {
+    const result = await this.service.findAll();
+    return reply.send(result);
+  }
+
+  async update(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    const body = request.body as Partial<SalaryAdvanceDTO>;
+    const result = await this.service.update(id, body);
+    return reply.send(result);
+  }
+
+  async delete(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    await this.service.delete(id);
+    return reply.code(204).send();
   }
 }
