@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { PrismaClient, SalaryAdvanceStatus } from '@prisma/client';
+import { PrismaClient, ValidationStatus } from '@prisma/client';
 import { SalaryAdvanceDAO } from './SalaryAdvanceDAO';
 import { SalaryAdvanceEntity } from '../entity/SalaryAdvanceEntity';
 
@@ -14,7 +14,8 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
         amount: data.amount!,
         reason: data.reason!,
         requestedDate: data.requestedDate!,
-        status: data.status ?? SalaryAdvanceStatus.PENDING,
+        status: data.status,
+        creatorId: data.creatorId,
         employeeId: data.employeeId!,
       },
     });
@@ -35,16 +36,6 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
     return results.map((s) => new SalaryAdvanceEntity(s));
   }
 
-  async updateStatus(
-    id: string,
-    status: SalaryAdvanceStatus
-  ): Promise<SalaryAdvanceEntity> {
-    return await this.prisma.salaryAdvance.update({
-      where: { id },
-      data: { status },
-    });
-  }
-
   async getApprovedAdvancesByEmployeeAndMonth(
     employeeId: string,
     year: string,
@@ -57,7 +48,7 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
     const results = await this.prisma.salaryAdvance.findMany({
       where: {
         employeeId,
-        status: 'APPROVED',
+        status: ValidationStatus.VALIDATED,
         requestedDate: {
           gte: start,
           lt: end,
@@ -93,5 +84,73 @@ export class SalaryAdvanceDAOImpl implements SalaryAdvanceDAO {
 
   async delete(id: string): Promise<void> {
     await this.prisma.salaryAdvance.delete({ where: { id } });
+  }
+
+  async validateByAdmin(salaryId: string, validatorId: string): Promise<void> {
+    await this.prisma.salaryAdvance.update({
+      where: { id: salaryId },
+      data: {
+        validatedByAdmin: validatorId,
+        status: ValidationStatus.AWAITING_SUPERADMIN_VALIDATION,
+      },
+    });
+  }
+
+  async validateBySuperAdmin(
+    salaryId: string,
+    validatorId: string
+  ): Promise<void> {
+    await this.prisma.salaryAdvance.update({
+      where: { id: salaryId },
+      data: {
+        validatedBySuperAdmin: validatorId,
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+  }
+
+  async reject(salaryId: string, reason: string): Promise<void> {
+    await this.prisma.salaryAdvance.update({
+      where: { id: salaryId },
+      data: {
+        status: ValidationStatus.REJECTED,
+        rejectedReason: reason,
+      },
+    });
+  }
+
+  async updateStatus(
+    id: string,
+    status: ValidationStatus
+  ): Promise<SalaryAdvanceEntity> {
+    const updated = await this.prisma.salaryAdvance.update({
+      where: { id },
+      data: { status },
+    });
+
+    return new SalaryAdvanceEntity(updated);
+  }
+
+  async findApprovedByEmployeeAndMonth(
+    employeeId: string,
+    year: string,
+    month: string
+  ): Promise<SalaryAdvanceEntity[]> {
+    const start = new Date(`${year}-${month}-01`);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+
+    const advances = await this.prisma.salaryAdvance.findMany({
+      where: {
+        employeeId,
+        status: ValidationStatus.VALIDATED,
+        requestedDate: {
+          gte: start,
+          lt: end,
+        },
+      },
+    });
+
+    return advances.map((s) => new SalaryAdvanceEntity(s));
   }
 }

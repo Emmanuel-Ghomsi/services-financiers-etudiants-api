@@ -1,3 +1,4 @@
+import { ValidationStatus } from '@prisma/client';
 import { z } from 'zod';
 
 export const LeaveDTOSchema = z.object({
@@ -7,8 +8,10 @@ export const LeaveDTOSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   comment: z.string().optional(),
-  status: z.string(),
+  status: z.nativeEnum(ValidationStatus),
   reviewedBy: z.string().uuid().optional(),
+  validatedByAdmin: z.string().optional(),
+  validatedBySuperAdmin: z.string().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

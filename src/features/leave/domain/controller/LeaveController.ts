@@ -7,6 +7,9 @@ import { LeaveListRequestSchema } from '@features/leave/presentation/payload/Lea
 import { zParse } from '@core/utils/utils';
 import { LeaveStatsRequestSchema } from '@features/leave/presentation/payload/LeaveStatsRequest';
 import { LeaveBalanceRequestSchema } from '@features/leave/presentation/payload/LeaveBalanceRequest';
+import { ValidateLeaveRequestSchema } from '@features/leave/presentation/payload/ValidateLeaveRequest';
+import { RejectLeaveRequestSchema } from '@features/leave/presentation/payload/RejectLeaveRequest';
+import { UpdateLeaveStatusRequestSchema } from '@features/leave/presentation/payload/UpdateLeaveStatusRequest';
 
 export class LeaveController {
   constructor(private readonly leaveService: LeaveService) {}
@@ -72,5 +75,33 @@ export class LeaveController {
     const { year, employeeId } = await zParse(request, LeaveStatsRequestSchema);
     const result = await this.leaveService.getStatistics(year, employeeId);
     return reply.send(result);
+  }
+
+  async updateStatus(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, UpdateLeaveStatusRequestSchema);
+    const updated = await this.leaveService.updateStatus(id, body.status);
+    res.send(updated);
+  }
+
+  async validateAsAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateLeaveRequestSchema);
+    await this.leaveService.validateAsAdmin(id, body.validatorId);
+    res.send({ message: 'Fiche validée par l’administrateur' });
+  }
+
+  async validateAsSuperAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateLeaveRequestSchema);
+    await this.leaveService.validateAsSuperAdmin(id, body.validatorId);
+    res.send({ message: 'Fiche validée par le super-admin' });
+  }
+
+  async reject(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, RejectLeaveRequestSchema);
+    await this.leaveService.reject(id, body.reason);
+    res.send({ message: 'Fiche rejetée' });
   }
 }

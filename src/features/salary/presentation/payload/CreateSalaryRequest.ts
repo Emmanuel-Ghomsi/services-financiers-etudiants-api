@@ -8,6 +8,7 @@ export const CreateSalaryRequestSchema = z.object({
   advances: z.number().nonnegative().default(0),
   paymentMode: z.nativeEnum(SalaryPaymentMode),
   paymentDate: z.coerce.date(),
+  userId: z.string().uuid(),
 });
 
 export type CreateSalaryRequest = z.infer<typeof CreateSalaryRequestSchema>;

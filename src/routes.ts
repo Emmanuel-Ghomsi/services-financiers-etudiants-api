@@ -58,14 +58,31 @@ export const registerRoutes = async (app: FastifyInstance) => {
     new DashboardAdvisorDAOImpl(prisma),
     dashboardDAO
   );
-  const expenseService = new ExpenseServiceImpl(new ExpenseDAOImpl());
-  const leaveService = new LeaveServiceImpl(new LeaveDAOImpl());
+  const expenseService = new ExpenseServiceImpl(
+    new ExpenseDAOImpl(),
+    userDAO,
+    notificationService
+  );
+  const leaveService = new LeaveServiceImpl(
+    new LeaveDAOImpl(),
+    userDAO,
+    notificationService
+  );
 
   const salaryAdvanceDAO = new SalaryAdvanceDAOImpl(prisma);
-  const salaryAdvanceService = new SalaryAdvanceServiceImpl(salaryAdvanceDAO);
+  const salaryAdvanceService = new SalaryAdvanceServiceImpl(
+    salaryAdvanceDAO,
+    userDAO,
+    notificationService
+  );
 
   const salaryDAO = new SalaryDAOImpl(prisma);
-  const salaryService = new SalaryServiceImpl(salaryDAO, salaryAdvanceService);
+  const salaryService = new SalaryServiceImpl(
+    salaryDAO,
+    salaryAdvanceDAO,
+    userDAO,
+    notificationService
+  );
 
   app.register(
     async (router) => {

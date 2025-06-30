@@ -1,8 +1,8 @@
-import { SalaryAdvanceStatus } from '@prisma/client';
+import { ValidationStatus } from '@prisma/client';
 import { z } from 'zod';
 
 export const UpdateSalaryAdvanceStatusRequestSchema = z.object({
-  status: z.nativeEnum(SalaryAdvanceStatus),
+  status: z.nativeEnum(ValidationStatus),
 });
 
 export type UpdateSalaryAdvanceStatusRequest = z.infer<

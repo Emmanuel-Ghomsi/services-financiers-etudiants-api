@@ -7,6 +7,7 @@ import { SalaryListRequest } from '@features/salary/presentation/payload/SalaryL
 import { SalaryPdfDataDTO } from '@features/salary/presentation/dto/SalaryPdfDataDTO';
 import { SalaryPeriodDTO } from '@features/salary/presentation/dto/SalaryPeriodDTO';
 import { SalaryPeriodPaginationDTO } from '@features/salary/presentation/dto/SalaryPeriodPaginationDTO';
+import { ValidationStatus } from '@prisma/client';
 
 export interface SalaryService {
   createSalary(request: CreateSalaryRequest): Promise<SalaryDTO>;
@@ -24,4 +25,8 @@ export interface SalaryService {
     page: number,
     limit: number
   ): Promise<SalaryPeriodPaginationDTO>;
+  validateAsAdmin(id: string, validatorId: string): Promise<void>;
+  validateAsSuperAdmin(id: string, validatorId: string): Promise<void>;
+  reject(id: string, reason: string): Promise<void>;
+  updateStatus(id: string, status: ValidationStatus): Promise<SalaryDTO>;
 }

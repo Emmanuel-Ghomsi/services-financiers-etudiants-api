@@ -38,15 +38,18 @@ model User {
   firstLoginExpiry DateTime?
   status           UserStatus @default(ACTIVE)
 
-  refreshTokens   RefreshToken[]
-  roles           UserToRole[]
-  clientFiles     ClientFile[]
-  Notification    Notification[]
-  expenses        Expense[]
-  salaries        Salary[]        @relation("Salary_Employee")
-  leavesRequested Leave[]         @relation("Leave_Employee")
-  leavesReviewed  Leave[]         @relation("Leave_Reviewed")
-  salaryAdvances  SalaryAdvance[] @relation("Advance_Employee")
+  refreshTokens         RefreshToken[]
+  roles                 UserToRole[]
+  clientFiles           ClientFile[]
+  Notification          Notification[]
+  expenses              Expense[]
+  salaries              Salary[]        @relation("Salary_Employee")
+  leavesRequested       Leave[]         @relation("Leave_Employee")
+  leavesReviewed        Leave[]         @relation("Leave_Reviewed")
+  salaryAdvances        SalaryAdvance[] @relation("Advance_Employee")
+  expensesCreator       Expense[]       @relation("Expense_Creator")
+  salariesCreator       Salary[]        @relation("Salary_Creator")
+  salaryAdvancesCreator SalaryAdvance[] @relation("Advance_Creator")
 
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
@@ -243,6 +246,13 @@ enum ExpenseCategory {
   ONE_TIME_PURCHASE
 }
 
+enum ValidationStatus {
+  AWAITING_ADMIN_VALIDATION
+  AWAITING_SUPERADMIN_VALIDATION
+  VALIDATED
+  REJECTED
+}
+
 model Expense {
   id          String               @id @default(uuid())
   amount      Float
@@ -254,6 +264,13 @@ model Expense {
   employeeId  String
   employee    User                 @relation(fields: [employeeId], references: [id])
   projectId   String?
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Expense_Creator", fields: [creatorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -280,6 +297,13 @@ model Salary {
   month       String            @db.Char(2)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Salary_Creator", fields: [creatorId], references: [id])
 }
 
 enum LeaveType {
@@ -288,41 +312,39 @@ enum LeaveType {
   EXCEPTIONAL
 }
 
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model Leave {
-  id         String      @id @default(uuid())
+  id         String    @id @default(uuid())
   employeeId String
-  employee   User        @relation("Leave_Employee", fields: [employeeId], references: [id])
+  employee   User      @relation("Leave_Employee", fields: [employeeId], references: [id])
   leaveType  LeaveType
   startDate  DateTime
   endDate    DateTime
   comment    String?
-  status     LeaveStatus @default(PENDING)
   reviewedBy String?
-  reviewed   User?       @relation("Leave_Reviewed", fields: [reviewedBy], references: [id])
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  reviewed   User?     @relation("Leave_Reviewed", fields: [reviewedBy], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
 }
 
 model SalaryAdvance {
-  id            String              @id @default(uuid())
+  id            String   @id @default(uuid())
   amount        Float
   reason        String
   requestedDate DateTime
-  status        SalaryAdvanceStatus @default(PENDING)
   employeeId    String
-  employee      User                @relation("Advance_Employee", fields: [employeeId], references: [id])
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-}
+  employee      User     @relation("Advance_Employee", fields: [employeeId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-enum SalaryAdvanceStatus {
-  PENDING
-  APPROVED
-  REJECTED
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Advance_Creator", fields: [creatorId], references: [id])
 }

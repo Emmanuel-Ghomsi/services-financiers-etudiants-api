@@ -1,3 +1,5 @@
+import { ValidationStatus } from '@prisma/client';
+
 export class SalaryEntity {
   constructor(params: {
     id: string;
@@ -11,6 +13,11 @@ export class SalaryEntity {
     paymentMode: string;
     paymentDate: Date;
     payslipUrl: string | null;
+    status: ValidationStatus;
+    validatedByAdmin?: string | null;
+    validatedBySuperAdmin?: string | null;
+    rejectedReason?: string | null;
+    creatorId: string | null;
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -28,6 +35,11 @@ export class SalaryEntity {
   paymentMode!: string;
   paymentDate!: Date;
   payslipUrl!: string | null;
+  status!: ValidationStatus;
+  validatedByAdmin?: string | null;
+  validatedBySuperAdmin?: string | null;
+  rejectedReason?: string | null;
+  creatorId?: string | null;
   createdAt!: Date;
   updatedAt!: Date;
 }

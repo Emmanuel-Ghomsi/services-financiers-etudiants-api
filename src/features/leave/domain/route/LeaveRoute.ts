@@ -162,4 +162,47 @@ export async function registerLeaveRoutes(
     },
     handler: controller.getStatistics.bind(controller),
   });
+
+  server.patch(`/leaves/:id/validate-admin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateLeaveRequest'),
+      tags: ['Leaves'],
+      summary: "Valider un congé en tant qu'admin",
+    },
+    preHandler: [server.authenticate, server.authorize(['ADMIN'])],
+    handler: controller.validateAsAdmin.bind(controller),
+  });
+
+  server.patch(`/leaves/:id/validate-superadmin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateLeaveRequest'),
+      tags: ['Leaves'],
+      summary: 'Valider un congé en tant que super-admin',
+    },
+    preHandler: [server.authenticate, server.authorize(['SUPER_ADMIN'])],
+    handler: controller.validateAsSuperAdmin.bind(controller),
+  });
+
+  server.patch(`/leaves/:id/reject`, {
+    schema: {
+      body: zodToSwaggerSchema('RejectExpenseRequest'),
+      tags: ['Leaves'],
+      summary: 'Rejeter un congé avec un motif',
+    },
+    preHandler: [
+      server.authenticate,
+      server.authorize(['ADMIN', 'SUPER_ADMIN']),
+    ],
+    handler: controller.reject.bind(controller),
+  });
+
+  server.patch('/leaves/:id/status', {
+    schema: {
+      body: zodToSwaggerSchema('UpdateLeaveStatusRequest'),
+      tags: ['Leaves'],
+      summary: 'Modifier le statut d’un congé',
+    },
+    preHandler: [server.authenticate],
+    handler: controller.updateLeave.bind(controller),
+  });
 }

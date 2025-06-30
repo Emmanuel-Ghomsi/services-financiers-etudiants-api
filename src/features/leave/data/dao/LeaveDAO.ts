@@ -2,6 +2,7 @@
 import { LeaveStatsDTO } from '@features/leave/presentation/dto/LeaveStatsDTO';
 import { LeaveEntity } from '../entity/LeaveEntity';
 import { LeaveBalanceDTO } from '@features/leave/presentation/dto/LeaveBalanceDTO';
+import { ValidationStatus } from '@prisma/client';
 
 export interface LeaveDAO {
   create(data: Partial<LeaveEntity>): Promise<LeaveEntity>;
@@ -25,4 +26,8 @@ export interface LeaveDAO {
   >;
   getStatistics(year: number, employeeId?: string): Promise<LeaveStatsDTO>;
   getLeaveBalance(employeeId: string, year: number): Promise<LeaveBalanceDTO>;
+  updateStatus(id: string, status: ValidationStatus): Promise<LeaveEntity>;
+  validateByAdmin(LeaveId: string, validatorId: string): Promise<void>;
+  validateBySuperAdmin(LeaveId: string, validatorId: string): Promise<void>;
+  reject(LeaveId: string, reason: string): Promise<void>;
 }

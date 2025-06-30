@@ -15,6 +15,10 @@ export function toSalaryDTO(entity: SalaryEntity): SalaryDTO {
     payslipUrl: entity.payslipUrl ?? undefined,
     year: entity.year,
     month: entity.month,
+    status: entity.status,
+    creatorId: entity.creatorId!,
+    validatedByAdmin: entity.validatedByAdmin!,
+    validatedBySuperAdmin: entity.validatedBySuperAdmin!,
     createdAt: entity.createdAt.toISOString(),
     updatedAt: entity.updatedAt.toISOString(),
   };
@@ -33,6 +37,10 @@ export function fromSalaryDTO(dto: SalaryDTO): SalaryEntity {
     payslipUrl: dto.payslipUrl ?? null,
     year: dto.year,
     month: dto.month,
+    status: dto.status,
+    creatorId: dto.creatorId!,
+    validatedByAdmin: dto.validatedByAdmin,
+    validatedBySuperAdmin: dto.validatedBySuperAdmin,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   });

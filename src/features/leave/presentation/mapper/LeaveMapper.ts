@@ -11,6 +11,8 @@ export function toLeaveDTO(entity: LeaveEntity): LeaveDTO {
     comment: entity.comment ?? undefined,
     status: entity.status,
     reviewedBy: entity.reviewedBy ?? undefined,
+    validatedByAdmin: entity.validatedByAdmin!,
+    validatedBySuperAdmin: entity.validatedBySuperAdmin!,
     createdAt: entity.createdAt.toISOString(),
     updatedAt: entity.updatedAt.toISOString(),
   };
@@ -26,6 +28,8 @@ export function fromLeaveDTO(dto: LeaveDTO): LeaveEntity {
     comment: dto.comment ?? null,
     status: dto.status,
     reviewedBy: dto.reviewedBy ?? null,
+    validatedByAdmin: dto.validatedByAdmin,
+    validatedBySuperAdmin: dto.validatedBySuperAdmin,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   });

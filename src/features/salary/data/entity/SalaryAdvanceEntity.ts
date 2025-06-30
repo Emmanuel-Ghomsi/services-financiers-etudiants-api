@@ -1,4 +1,4 @@
-import { SalaryAdvanceStatus } from '@prisma/client';
+import { ValidationStatus } from '@prisma/client';
 
 export class SalaryAdvanceEntity {
   constructor(partial: Partial<SalaryAdvanceEntity>) {
@@ -9,8 +9,12 @@ export class SalaryAdvanceEntity {
   amount!: number;
   reason!: string;
   requestedDate!: Date;
-  status!: SalaryAdvanceStatus;
   employeeId!: string;
+  status!: ValidationStatus;
+  validatedByAdmin?: string | null;
+  validatedBySuperAdmin?: string | null;
+  rejectedReason?: string | null;
+  creatorId?: string | null;
   createdAt!: Date;
   updatedAt!: Date;
 }

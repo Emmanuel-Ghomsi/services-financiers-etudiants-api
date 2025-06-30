@@ -1,4 +1,4 @@
-import { PrismaClient, LeaveStatus, LeaveType } from '@prisma/client';
+import { PrismaClient, ValidationStatus, LeaveType } from '@prisma/client';
 import { LeaveEntity } from '../entity/LeaveEntity';
 import { LeaveDAO } from './LeaveDAO';
 import { LeaveStatsDTO } from '@features/leave/presentation/dto/LeaveStatsDTO';
@@ -16,6 +16,9 @@ export class LeaveDAOImpl implements LeaveDAO {
       endDate: new Date(record.endDate),
       comment: record.comment,
       status: record.status,
+      validatedByAdmin: record.validateByAdmin,
+      validatedBySuperAdmin: record.validateBySuperAdmin,
+      rejectedReason: record.rejectedReason,
       reviewedBy: record.reviewedBy,
       createdAt: new Date(record.createdAt),
       updatedAt: new Date(record.updatedAt),
@@ -30,7 +33,7 @@ export class LeaveDAOImpl implements LeaveDAO {
         startDate: data.startDate!,
         endDate: data.endDate!,
         comment: data.comment ?? null,
-        status: (data.status as LeaveStatus) ?? LeaveStatus.PENDING,
+        status: data.status,
         reviewedBy: data.reviewedBy ?? null,
       },
     });
@@ -65,7 +68,7 @@ export class LeaveDAOImpl implements LeaveDAO {
         startDate: data.startDate,
         endDate: data.endDate,
         comment: data.comment,
-        status: data.status as LeaveStatus,
+        status: data.status,
         reviewedBy: data.reviewedBy,
       },
     });
@@ -109,7 +112,7 @@ export class LeaveDAOImpl implements LeaveDAO {
     const leaves = await prisma.leave.findMany({
       where: {
         employeeId,
-        status: 'APPROVED',
+        status: ValidationStatus.VALIDATED,
         startDate: { lte: endOfYear },
         endDate: { gte: startOfYear },
       },
@@ -140,7 +143,7 @@ export class LeaveDAOImpl implements LeaveDAO {
     { employeeId: string; acquired: number; taken: number; remaining: number }[]
   > {
     const approvedLeaves = await prisma.leave.findMany({
-      where: { status: 'APPROVED' },
+      where: { status: ValidationStatus.VALIDATED },
     });
 
     const grouped: Record<string, number> = {};
@@ -176,7 +179,7 @@ export class LeaveDAOImpl implements LeaveDAO {
     }[]
   > {
     const leaves = await prisma.leave.findMany({
-      where: { status: 'APPROVED' },
+      where: { status: ValidationStatus.VALIDATED },
       orderBy: { startDate: 'asc' },
     });
 
@@ -215,7 +218,7 @@ export class LeaveDAOImpl implements LeaveDAO {
 
     const leaves = await prisma.leave.findMany({
       where: {
-        status: 'APPROVED',
+        status: ValidationStatus.VALIDATED,
         startDate: { lte: end },
         endDate: { gte: start },
         ...(employeeId ? { employeeId } : {}),
@@ -243,5 +246,50 @@ export class LeaveDAOImpl implements LeaveDAO {
     }
 
     return { totalApprovedDays, monthlyDaysTaken, byType };
+  }
+
+  async validateByAdmin(salaryId: string, validatorId: string): Promise<void> {
+    await prisma.leave.update({
+      where: { id: salaryId },
+      data: {
+        validatedByAdmin: validatorId,
+        status: ValidationStatus.AWAITING_SUPERADMIN_VALIDATION,
+      },
+    });
+  }
+
+  async validateBySuperAdmin(
+    salaryId: string,
+    validatorId: string
+  ): Promise<void> {
+    await prisma.leave.update({
+      where: { id: salaryId },
+      data: {
+        validatedBySuperAdmin: validatorId,
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+  }
+
+  async reject(salaryId: string, reason: string): Promise<void> {
+    await prisma.leave.update({
+      where: { id: salaryId },
+      data: {
+        status: ValidationStatus.REJECTED,
+        rejectedReason: reason,
+      },
+    });
+  }
+
+  async updateStatus(
+    id: string,
+    status: ValidationStatus
+  ): Promise<LeaveEntity> {
+    const updated = await prisma.leave.update({
+      where: { id },
+      data: { status },
+    });
+
+    return new LeaveEntity(updated);
   }
 }

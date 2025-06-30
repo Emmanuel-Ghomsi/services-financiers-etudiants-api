@@ -59,6 +59,17 @@ import { LeaveBalanceDTOSchema } from '@features/leave/presentation/dto/LeaveBal
 import { LeaveDTOSchema } from '@features/leave/presentation/dto/LeaveDTO';
 import { LeavePaginationDTOSchema } from '@features/leave/presentation/dto/LeavePaginationDTO';
 import { LeaveStatsDTOSchema } from '@features/leave/presentation/dto/LeaveStatsDTO';
+import { RejectExpenseRequestSchema } from '@features/expense/presentation/payload/RejectExpenseRequest';
+import { RejectLeaveRequestSchema } from '@features/leave/presentation/payload/RejectLeaveRequest';
+import { ValidateLeaveRequestSchema } from '@features/leave/presentation/payload/ValidateLeaveRequest';
+import { RejectSalaryRequestSchema } from '@features/salary/presentation/payload/RejectSalaryRequest';
+import { RejectSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/RejectSalaryAdvanceRequest';
+import { ValidateSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/ValidateSalaryAdvanceRequest';
+import { ValidateExpenseRequestSchema } from '@features/expense/presentation/payload/ValidateExpenseRequest';
+import { ValidateSalaryRequestSchema } from '@features/salary/presentation/payload/ValidateSalaryRequest';
+import { UpdateLeaveStatusRequestSchema } from '@features/leave/presentation/payload/UpdateLeaveStatusRequest';
+import { UpdateExpenseStatusRequestSchema } from '@features/expense/presentation/payload/UpdateExpenseStatusRequest';
+import { UpdateSalaryStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryStatusRequest';
 
 export const swaggerSchemasMap: Record<string, z.ZodType> = {
   // 🔐 Auth
@@ -107,6 +118,9 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   ExpenseDTO: ExpenseDTOSchema,
   ExpensePaginationDTO: ExpensePaginationDTOSchema,
   ExpenseStatsDTO: ExpenseStatsDTOSchema,
+  RejectExpenseRequest: RejectExpenseRequestSchema,
+  ValidateExpenseRequest: ValidateExpenseRequestSchema,
+  UpdateExpenseStatusRequest: UpdateExpenseStatusRequestSchema,
 
   // Salary
   CreateSalaryRequest: CreateSalaryRequestSchema,
@@ -122,6 +136,11 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   SalaryPdfDataDTO: SalaryPdfDataDTOSchema,
   SalaryPeriodDTO: SalaryPeriodDTOSchema,
   SalaryPeriodPaginationDTO: SalaryPeriodPaginationDTOSchema,
+  RejectSalaryRequest: RejectSalaryRequestSchema,
+  ValidateSalaryRequest: ValidateSalaryRequestSchema,
+  RejectSalaryAdvanceRequest: RejectSalaryAdvanceRequestSchema,
+  ValidateSalaryAdvanceRequest: ValidateSalaryAdvanceRequestSchema,
+  UpdateSalaryStatusRequest: UpdateSalaryStatusRequestSchema,
 
   // Leave
   CreateLeaveRequest: CreateLeaveRequestSchema,
@@ -133,4 +152,7 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   LeaveDTO: LeaveDTOSchema,
   LeavePaginationDTO: LeavePaginationDTOSchema,
   LeaveStatsDTO: LeaveStatsDTOSchema,
+  RejectLeaveRequest: RejectLeaveRequestSchema,
+  ValidateLeaveRequest: ValidateLeaveRequestSchema,
+  UpdateLeaveStatusRequest: UpdateLeaveStatusRequestSchema,
 };

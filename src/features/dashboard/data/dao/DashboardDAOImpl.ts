@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ValidationStatus } from '@prisma/client';
 import { DashboardDAO } from './DashboardDAO';
 
 export class DashboardDAOImpl implements DashboardDAO {
@@ -24,7 +24,11 @@ export class DashboardDAOImpl implements DashboardDAO {
 
   async getPendingAdvancesCount(): Promise<number> {
     return this.prisma.salaryAdvance.count({
-      where: { status: 'PENDING' },
+      where: {
+        status:
+          ValidationStatus.AWAITING_ADMIN_VALIDATION ||
+          ValidationStatus.AWAITING_SUPERADMIN_VALIDATION,
+      },
     });
   }
 
@@ -46,7 +50,7 @@ export class DashboardDAOImpl implements DashboardDAO {
       where: {
         startDate: { lte: today },
         endDate: { gte: today },
-        status: 'APPROVED',
+        status: ValidationStatus.VALIDATED,
       },
     });
   }

@@ -138,4 +138,47 @@ export async function registerExpenseRoutes(
     preHandler: [server.authenticate],
     handler: controller.downloadPieceJustificative.bind(controller),
   });
+
+  server.patch('/expenses/:id/status', {
+    schema: {
+      body: zodToSwaggerSchema('UpdateExpenseStatusRequest'),
+      tags: ['Expenses'],
+      summary: 'Modifier le statut d’une dépense',
+    },
+    preHandler: [server.authenticate],
+    handler: controller.updateExpense.bind(controller),
+  });
+
+  server.patch(`/expenses/:id/validate-admin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateExpenseRequest'),
+      tags: ['Expenses'],
+      summary: "Valider une dépense en tant qu'admin",
+    },
+    preHandler: [server.authenticate, server.authorize(['ADMIN'])],
+    handler: controller.validateAsAdmin.bind(controller),
+  });
+
+  server.patch(`/expenses/:id/validate-superadmin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateExpenseRequest'),
+      tags: ['Expenses'],
+      summary: 'Valider une dépense en tant que super-admin',
+    },
+    preHandler: [server.authenticate, server.authorize(['SUPER_ADMIN'])],
+    handler: controller.validateAsSuperAdmin.bind(controller),
+  });
+
+  server.patch(`/expenses/:id/reject`, {
+    schema: {
+      body: zodToSwaggerSchema('RejectExpenseRequest'),
+      tags: ['Expenses'],
+      summary: 'Rejeter une dépense avec un motif',
+    },
+    preHandler: [
+      server.authenticate,
+      server.authorize(['ADMIN', 'SUPER_ADMIN']),
+    ],
+    handler: controller.reject.bind(controller),
+  });
 }

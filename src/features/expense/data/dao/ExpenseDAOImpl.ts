@@ -3,6 +3,7 @@ import {
   ExpenseCategory,
   ExpenseCategoryGroup,
   Prisma,
+  ValidationStatus,
 } from '@prisma/client';
 import { ExpenseDAO } from './ExpenseDAO';
 import { ExpenseEntity } from '../entity/ExpenseEntity';
@@ -22,6 +23,11 @@ export class ExpenseDAOImpl implements ExpenseDAO {
       fileUrl: record.fileUrl,
       employeeId: record.employeeId,
       projectId: record.projectId,
+      status: record.status,
+      validatedByAdmin: record.validateByAdmin,
+      validatedBySuperAdmin: record.validateBySuperAdmin,
+      rejectedReason: record.rejectedReason,
+      creatorId: record.creatorId,
       createdAt: new Date(record.createdAt),
       updatedAt: new Date(record.updatedAt),
     });
@@ -38,6 +44,8 @@ export class ExpenseDAOImpl implements ExpenseDAO {
         fileUrl: data.fileUrl ?? null,
         employeeId: data.employeeId!,
         projectId: data.projectId ?? null,
+        status: data.status,
+        creatorId: data.creatorId,
       },
     });
     return this.toEntity(created);
@@ -164,5 +172,65 @@ export class ExpenseDAOImpl implements ExpenseDAO {
     }
 
     return { totalYear, monthlyTotals, byCategory };
+  }
+
+  async findByCreator(userId: string): Promise<ExpenseEntity[]> {
+    const list = await prisma.expense.findMany({
+      where: { creatorId: userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        creator: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+    return list.map((f) => new ExpenseEntity(f));
+  }
+
+  async validateByAdmin(expenseId: string, validatorId: string): Promise<void> {
+    await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        validatedByAdmin: validatorId,
+        status: ValidationStatus.AWAITING_SUPERADMIN_VALIDATION,
+      },
+    });
+  }
+
+  async validateBySuperAdmin(
+    expenseId: string,
+    validatorId: string
+  ): Promise<void> {
+    await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        validatedBySuperAdmin: validatorId,
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+  }
+
+  async reject(expenseId: string, reason: string): Promise<void> {
+    await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        status: ValidationStatus.REJECTED,
+        rejectedReason: reason,
+      },
+    });
+  }
+
+  async updateStatus(
+    id: string,
+    status: ValidationStatus
+  ): Promise<ExpenseEntity> {
+    const updated = await prisma.expense.update({
+      where: { id },
+      data: { status },
+    });
+
+    return new ExpenseEntity(updated);
   }
 }

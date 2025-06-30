@@ -1,0 +1,8 @@
+-- CreateEnum
+CREATE TYPE "ValidationStatus" AS ENUM ('AWAITING_ADMIN_VALIDATION', 'AWAITING_SUPERADMIN_VALIDATION', 'VALIDATED', 'REJECTED');
+
+-- AlterTable
+ALTER TABLE "Expense" ADD COLUMN     "rejectedReason" TEXT,
+ADD COLUMN     "status" "ValidationStatus" NOT NULL DEFAULT 'AWAITING_ADMIN_VALIDATION',
+ADD COLUMN     "validatedByAdmin" BOOLEAN DEFAULT false,
+ADD COLUMN     "validatedBySuperAdmin" BOOLEAN DEFAULT false;

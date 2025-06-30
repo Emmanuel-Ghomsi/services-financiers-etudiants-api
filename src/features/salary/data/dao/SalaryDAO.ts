@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { ValidationStatus } from '@prisma/client';
 import { SalaryEntity } from '../entity/SalaryEntity';
 
 export interface SalaryDAO {
@@ -19,4 +20,8 @@ export interface SalaryDAO {
     offset: number,
     limit: number
   ): Promise<[SalaryEntity[], number]>;
+  updateStatus(id: string, status: ValidationStatus): Promise<SalaryEntity>;
+  validateByAdmin(salaryId: string, validatorId: string): Promise<void>;
+  validateBySuperAdmin(salaryId: string, validatorId: string): Promise<void>;
+  reject(salaryId: string, reason: string): Promise<void>;
 }

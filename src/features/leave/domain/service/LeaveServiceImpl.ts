@@ -12,11 +12,24 @@ import { v4 as uuidv4 } from 'uuid';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
 import { LeaveStatsDTO } from '@features/leave/presentation/dto/LeaveStatsDTO';
 import { LeaveBalanceDTO } from '@features/leave/presentation/dto/LeaveBalanceDTO';
+import { UserDAO } from '@features/auth/data/dao/UserDAO';
+import { NotificationService } from '@features/notification/domain/service/NotificationService';
+import { RoleEnum, ValidationStatus } from '@prisma/client';
+import { config } from '@core/config/env';
+import { ValidationException } from '@core/exceptions/ValidationException';
+import { logger } from '@core/config/logger';
 
 export class LeaveServiceImpl implements LeaveService {
-  constructor(private readonly leaveDAO: LeaveDAO) {}
+  constructor(
+    private readonly leaveDAO: LeaveDAO,
+    private readonly userDAO: UserDAO,
+    private readonly notificationService: NotificationService
+  ) {}
 
   async createLeave(request: CreateLeaveRequest): Promise<LeaveDTO> {
+    const user = await this.userDAO.findById(request.userId);
+    if (!user) throw new ResourceNotFoundException('Utilisateur non trouvée');
+
     const entity = new LeaveEntity({
       id: uuidv4(),
       employeeId: request.employeeId,
@@ -24,13 +37,28 @@ export class LeaveServiceImpl implements LeaveService {
       startDate: request.startDate,
       endDate: request.endDate,
       comment: request.comment ?? null,
-      status: 'PENDING',
-      reviewedBy: null,
+      status: user.roles.includes(RoleEnum.SUPER_ADMIN)
+        ? ValidationStatus.VALIDATED
+        : user.roles.includes(RoleEnum.ADMIN)
+          ? ValidationStatus.AWAITING_SUPERADMIN_VALIDATION
+          : ValidationStatus.AWAITING_ADMIN_VALIDATION,
+      reviewedBy: user.id,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     const saved = await this.leaveDAO.create(entity);
+
+    const admins = await this.userDAO.findAllByRoles(['ADMIN', 'SUPER_ADMIN']);
+
+    await this.notificationService.notifyMany(
+      admins.map((a) => a.id),
+      'LEAVE_CREATED',
+      'Nouveau congé créé',
+      `Identifiant : ${saved.id}`,
+      `${config.server.frontend}/leaves/${saved.id}/view`
+    );
+
     return toLeaveDTO(saved);
   }
 
@@ -111,5 +139,106 @@ export class LeaveServiceImpl implements LeaveService {
     employeeId?: string
   ): Promise<LeaveStatsDTO> {
     return await this.leaveDAO.getStatistics(year, employeeId);
+  }
+
+  async validateAsAdmin(id: string, validatorId: string): Promise<void> {
+    const leave = await this.leaveDAO.findById(id);
+    if (!leave || leave.status !== ValidationStatus.AWAITING_ADMIN_VALIDATION) {
+      throw new ValidationException(
+        'Statut incompatible pour validation admin'
+      );
+    }
+
+    await this.leaveDAO.validateByAdmin(id, validatorId);
+
+    const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+    await this.notificationService.notifyMany(
+      superAdmins.map((a) => a.id),
+      'LEAVE_TO_FINAL_VALIDATE',
+      'Validation finale requise',
+      `Congé ${leave.id} à valider définitivement`,
+      `${config.server.frontend}/leaves/${leave.id}/view`
+    );
+  }
+
+  async validateAsSuperAdmin(id: string, validatorId: string): Promise<void> {
+    const leave = await this.leaveDAO.findById(id);
+    if (
+      !leave ||
+      leave.status !== ValidationStatus.AWAITING_SUPERADMIN_VALIDATION
+    ) {
+      throw new ValidationException(
+        'Statut incompatible pour validation super admin'
+      );
+    }
+
+    await this.leaveDAO.validateBySuperAdmin(id, validatorId);
+
+    await this.notificationService.notify(
+      leave.reviewedBy!,
+      'LEAVE_VALIDATED',
+      'Votre congé a été validée',
+      `Identifiant : ${leave.id}`,
+      `${config.server.frontend}/leaves/${leave.id}/view`
+    );
+  }
+
+  async reject(id: string, reason: string): Promise<void> {
+    const leave = await this.leaveDAO.findById(id);
+    if (!leave || leave.status === ValidationStatus.VALIDATED) {
+      throw new ValidationException('Impossible de rejeter ce congé');
+    }
+
+    if (!reason) {
+      throw new ValidationException('Le motif du rejet est obligatoire');
+    }
+
+    await this.leaveDAO.reject(id, reason);
+
+    await this.notificationService.notify(
+      leave.reviewedBy!,
+      'leave_REJECTED',
+      'Votre congé a été rejetée',
+      `Identifiant : ${leave.id} — Raison : ${reason}`,
+      `${config.server.frontend}/leaves/${leave.id}/view`
+    );
+  }
+
+  async updateStatus(id: string, status: ValidationStatus): Promise<LeaveDTO> {
+    const leave = await this.leaveDAO.findById(id);
+    if (!leave) throw new ResourceNotFoundException('Dépense non trouvée');
+
+    const updatedEntity = await this.leaveDAO.updateStatus(id, status);
+
+    const creator = await this.userDAO.findById(leave.reviewedBy!);
+
+    if (!creator) {
+      logger.warn(`Aucun utilisateur trouvé pour la dépense ${id}`);
+      return toLeaveDTO(updatedEntity);
+    }
+
+    const leaveId = leave.id;
+
+    if (status === ValidationStatus.AWAITING_ADMIN_VALIDATION) {
+      const admins = await this.userDAO.findAllByRoles(['ADMIN']);
+      await this.notificationService.notifyMany(
+        admins.map((a) => a.id),
+        'LEAVE_TO_VALIDATE',
+        'Validation dépense',
+        `Dépense ${leaveId} à valider`,
+        `${config.server.frontend}/leaves/${leave.id}/view`
+      );
+    } else if (status === ValidationStatus.AWAITING_SUPERADMIN_VALIDATION) {
+      const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
+      await this.notificationService.notifyMany(
+        superAdmins.map((a) => a.id),
+        'LEAVE_TO_FINAL_VALIDATE',
+        'Validation finale dépense requise',
+        `Dépense ${leaveId} à valider définitivement`,
+        `${config.server.frontend}/leaves/${leave.id}/view`
+      );
+    }
+
+    return toLeaveDTO(updatedEntity);
   }
 }

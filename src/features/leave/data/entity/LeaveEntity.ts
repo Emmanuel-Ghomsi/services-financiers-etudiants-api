@@ -1,3 +1,5 @@
+import { ValidationStatus } from '@prisma/client';
+
 export class LeaveEntity {
   constructor(params: {
     id: string;
@@ -6,7 +8,10 @@ export class LeaveEntity {
     startDate: Date;
     endDate: Date;
     comment: string | null;
-    status: string;
+    status: ValidationStatus;
+    validatedByAdmin?: string | null;
+    validatedBySuperAdmin?: string | null;
+    rejectedReason?: string | null;
     reviewedBy: string | null;
     createdAt: Date;
     updatedAt: Date;
@@ -20,7 +25,10 @@ export class LeaveEntity {
   startDate!: Date;
   endDate!: Date;
   comment!: string | null;
-  status!: string;
+  status!: ValidationStatus;
+  validatedByAdmin?: string | null;
+  validatedBySuperAdmin?: string | null;
+  rejectedReason?: string | null;
   reviewedBy!: string | null;
   createdAt!: Date;
   updatedAt!: Date;

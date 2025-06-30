@@ -139,4 +139,37 @@ export async function registerSalaryAdvanceRoutes(
     },
     handler: controller.delete.bind(controller),
   });
+
+  server.patch(`/salary-advances/:id/validate-admin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateSalaryAdvanceRequest'),
+      tags: ['Salary Advances'],
+      summary: "Valider une avance salaire en tant qu'admin",
+    },
+    preHandler: [server.authenticate, server.authorize(['ADMIN'])],
+    handler: controller.validateAsAdmin.bind(controller),
+  });
+
+  server.patch(`/salary-advances/:id/validate-superadmin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateSalaryAdvanceRequest'),
+      tags: ['Salary Advances'],
+      summary: 'Valider une avance salaire en tant que super-admin',
+    },
+    preHandler: [server.authenticate, server.authorize(['SUPER_ADMIN'])],
+    handler: controller.validateAsSuperAdmin.bind(controller),
+  });
+
+  server.patch(`/salary-advances/:id/reject`, {
+    schema: {
+      body: zodToSwaggerSchema('RejectSalaryAdvanceRequest'),
+      tags: ['Salary Advances'],
+      summary: 'Rejeter une avance salaire avec un motif',
+    },
+    preHandler: [
+      server.authenticate,
+      server.authorize(['ADMIN', 'SUPER_ADMIN']),
+    ],
+    handler: controller.reject.bind(controller),
+  });
 }

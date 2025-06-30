@@ -1,5 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { PrismaClient, SalaryPaymentMode } from '@prisma/client';
+import {
+  PrismaClient,
+  SalaryPaymentMode,
+  ValidationStatus,
+} from '@prisma/client';
 import { SalaryDAO } from './SalaryDAO';
 import { SalaryEntity } from '../entity/SalaryEntity';
 
@@ -19,6 +23,11 @@ export class SalaryDAOImpl implements SalaryDAO {
       payslipUrl: record.payslipUrl,
       year: record.year,
       month: record.month,
+      status: record.status,
+      validatedByAdmin: record.validateByAdmin,
+      validatedBySuperAdmin: record.validateBySuperAdmin,
+      rejectedReason: record.rejectedReason,
+      creatorId: record.creatorId,
       createdAt: new Date(record.createdAt),
       updatedAt: new Date(record.updatedAt),
     });
@@ -46,6 +55,8 @@ export class SalaryDAOImpl implements SalaryDAO {
         payslipUrl: data.payslipUrl ?? null,
         year,
         month,
+        status: data.status,
+        creatorId: data.creatorId,
       },
     });
 
@@ -150,5 +161,50 @@ export class SalaryDAOImpl implements SalaryDAO {
     ]);
 
     return [items.map(this.toEntity), total];
+  }
+
+  async validateByAdmin(salaryId: string, validatorId: string): Promise<void> {
+    await this.prisma.salary.update({
+      where: { id: salaryId },
+      data: {
+        validatedByAdmin: validatorId,
+        status: ValidationStatus.AWAITING_SUPERADMIN_VALIDATION,
+      },
+    });
+  }
+
+  async validateBySuperAdmin(
+    salaryId: string,
+    validatorId: string
+  ): Promise<void> {
+    await this.prisma.salary.update({
+      where: { id: salaryId },
+      data: {
+        validatedBySuperAdmin: validatorId,
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+  }
+
+  async reject(salaryId: string, reason: string): Promise<void> {
+    await this.prisma.salary.update({
+      where: { id: salaryId },
+      data: {
+        status: ValidationStatus.REJECTED,
+        rejectedReason: reason,
+      },
+    });
+  }
+
+  async updateStatus(
+    id: string,
+    status: ValidationStatus
+  ): Promise<SalaryEntity> {
+    const updated = await this.prisma.salary.update({
+      where: { id },
+      data: { status },
+    });
+
+    return new SalaryEntity(updated);
   }
 }

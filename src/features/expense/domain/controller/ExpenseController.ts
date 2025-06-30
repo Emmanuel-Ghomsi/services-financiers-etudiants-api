@@ -11,6 +11,9 @@ import { ExpenseStatsRequestSchema } from '@features/expense/presentation/payloa
 import { FileStorageService } from '@core/services/FileStorageService';
 import path from 'path';
 import fs from 'fs/promises';
+import { RejectExpenseRequestSchema } from '@features/expense/presentation/payload/RejectExpenseRequest';
+import { ValidateExpenseRequestSchema } from '@features/expense/presentation/payload/ValidateExpenseRequest';
+import { UpdateSalaryAdvanceStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryAdvanceStatusRequest';
 
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
@@ -100,5 +103,33 @@ export class ExpenseController {
         .code(404)
         .send({ message: 'Fichier introuvable sur le serveur' });
     }
+  }
+
+  async updateStatus(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, UpdateSalaryAdvanceStatusRequestSchema);
+    const updated = await this.expenseService.updateStatus(id, body.status);
+    res.send(updated);
+  }
+
+  async validateAsAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateExpenseRequestSchema);
+    await this.expenseService.validateAsAdmin(id, body.validatorId);
+    res.send({ message: 'Dépense validée par l’administrateur' });
+  }
+
+  async validateAsSuperAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateExpenseRequestSchema);
+    await this.expenseService.validateAsSuperAdmin(id, body.validatorId);
+    res.send({ message: 'Dépense validée par le super-admin' });
+  }
+
+  async reject(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, RejectExpenseRequestSchema);
+    await this.expenseService.reject(id, body.reason);
+    res.send({ message: 'Dépense rejetée' });
   }
 }

@@ -6,6 +6,7 @@ import { LeavePaginationDTO } from '@features/leave/presentation/dto/LeavePagina
 import { LeaveListRequest } from '@features/leave/presentation/payload/LeaveListRequest';
 import { LeaveStatsDTO } from '@features/leave/presentation/dto/LeaveStatsDTO';
 import { LeaveBalanceDTO } from '@features/leave/presentation/dto/LeaveBalanceDTO';
+import { ValidationStatus } from '@prisma/client';
 
 export interface LeaveService {
   createLeave(request: CreateLeaveRequest): Promise<LeaveDTO>;
@@ -29,4 +30,8 @@ export interface LeaveService {
     }[]
   >;
   getStatistics(year: number, employeeId?: string): Promise<LeaveStatsDTO>;
+  validateAsAdmin(id: string, validatorId: string): Promise<void>;
+  validateAsSuperAdmin(id: string, validatorId: string): Promise<void>;
+  reject(id: string, reason: string): Promise<void>;
+  updateStatus(id: string, status: ValidationStatus): Promise<LeaveDTO>;
 }

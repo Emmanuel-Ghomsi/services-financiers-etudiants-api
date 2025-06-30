@@ -7,6 +7,9 @@ import { SalaryListRequestSchema } from '@features/salary/presentation/payload/S
 import { zParse } from '@core/utils/utils';
 import { SalaryPeriodFilterRequestSchema } from '@features/salary/presentation/payload/SalaryPeriodFilterRequest';
 import { SalaryPeriodPaginatedRequestSchema } from '@features/salary/presentation/payload/SalaryPeriodPaginatedRequest';
+import { RejectSalaryRequestSchema } from '@features/salary/presentation/payload/RejectSalaryRequest';
+import { ValidateSalaryRequestSchema } from '@features/salary/presentation/payload/ValidateSalaryRequest';
+import { UpdateSalaryStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryStatusRequest';
 
 export class SalaryController {
   constructor(private readonly salaryService: SalaryService) {}
@@ -79,5 +82,33 @@ export class SalaryController {
       limit
     );
     return reply.send(result);
+  }
+
+  async updateStatus(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, UpdateSalaryStatusRequestSchema);
+    const updated = await this.salaryService.updateStatus(id, body.status);
+    res.send(updated);
+  }
+
+  async validateAsAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateSalaryRequestSchema);
+    await this.salaryService.validateAsAdmin(id, body.validatorId);
+    res.send({ message: 'Salaire validé par l’administrateur' });
+  }
+
+  async validateAsSuperAdmin(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, ValidateSalaryRequestSchema);
+    await this.salaryService.validateAsSuperAdmin(id, body.validatorId);
+    res.send({ message: 'Salaire validé par le super-admin' });
+  }
+
+  async reject(req: FastifyRequest, res: FastifyReply) {
+    const { id } = req.params as { id: string };
+    const body = await zParse(req, RejectSalaryRequestSchema);
+    await this.salaryService.reject(id, body.reason);
+    res.send({ message: 'Salaire rejeté' });
   }
 }

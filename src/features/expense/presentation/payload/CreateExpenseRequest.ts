@@ -15,6 +15,7 @@ export const CreateExpenseRequestSchema = z.object({
   description: z.string().optional(),
   fileUrl: z.string().url().optional(),
   employeeId: z.string().uuid(),
+  userId: z.string().uuid(),
   projectId: z.string().uuid().optional(),
 });
 

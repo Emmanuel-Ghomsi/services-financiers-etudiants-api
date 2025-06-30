@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { SalaryAdvanceStatus } from '@prisma/client';
+import { ValidationStatus } from '@prisma/client';
 import { SalaryAdvanceEntity } from '../entity/SalaryAdvanceEntity';
 
 export interface SalaryAdvanceDAO {
@@ -8,7 +8,7 @@ export interface SalaryAdvanceDAO {
   findAllByEmployee(employeeId: string): Promise<SalaryAdvanceEntity[]>;
   updateStatus(
     id: string,
-    status: SalaryAdvanceStatus
+    status: ValidationStatus
   ): Promise<SalaryAdvanceEntity>;
   getApprovedAdvancesByEmployeeAndMonth(
     employeeId: string,
@@ -21,4 +21,16 @@ export interface SalaryAdvanceDAO {
     data: Partial<SalaryAdvanceEntity>
   ): Promise<SalaryAdvanceEntity>;
   delete(id: string): Promise<void>;
+  updateStatus(
+    id: string,
+    status: ValidationStatus
+  ): Promise<SalaryAdvanceEntity>;
+  validateByAdmin(salaryId: string, validatorId: string): Promise<void>;
+  validateBySuperAdmin(salaryId: string, validatorId: string): Promise<void>;
+  reject(salaryId: string, reason: string): Promise<void>;
+  findApprovedByEmployeeAndMonth(
+    employeeId: string,
+    year: string,
+    month: string
+  ): Promise<SalaryAdvanceEntity[]>;
 }

@@ -118,4 +118,47 @@ export async function registerSalaryRoutes(
     },
     handler: controller.getSalariesByPeriodPaginated.bind(controller),
   });
+
+  server.patch(`/salaries/:id/validate-admin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateSalaryRequest'),
+      tags: ['Salaries'],
+      summary: "Valider un salaire en tant qu'admin",
+    },
+    preHandler: [server.authenticate, server.authorize(['ADMIN'])],
+    handler: controller.validateAsAdmin.bind(controller),
+  });
+
+  server.patch(`/salaries/:id/validate-superadmin`, {
+    schema: {
+      body: zodToSwaggerSchema('ValidateSalaryRequest'),
+      tags: ['Salaries'],
+      summary: 'Valider un salaire en tant que super-admin',
+    },
+    preHandler: [server.authenticate, server.authorize(['SUPER_ADMIN'])],
+    handler: controller.validateAsSuperAdmin.bind(controller),
+  });
+
+  server.patch(`/salaries/:id/reject`, {
+    schema: {
+      body: zodToSwaggerSchema('RejectSalaryRequest'),
+      tags: ['Salaries'],
+      summary: 'Rejeter un salaire avec un motif',
+    },
+    preHandler: [
+      server.authenticate,
+      server.authorize(['ADMIN', 'SUPER_ADMIN']),
+    ],
+    handler: controller.reject.bind(controller),
+  });
+
+  server.patch('/salaries/:id/status', {
+    schema: {
+      body: zodToSwaggerSchema('UpdateSalaryStatusRequest'),
+      tags: ['Salaries'],
+      summary: 'Modifier le statut d’un salaire',
+    },
+    preHandler: [server.authenticate],
+    handler: controller.updateSalary.bind(controller),
+  });
 }
