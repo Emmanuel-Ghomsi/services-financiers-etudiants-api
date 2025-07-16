@@ -2,7 +2,7 @@
 import { LeaveStatsDTO } from '@features/leave/presentation/dto/LeaveStatsDTO';
 import { LeaveEntity } from '../entity/LeaveEntity';
 import { LeaveBalanceDTO } from '@features/leave/presentation/dto/LeaveBalanceDTO';
-import { ValidationStatus } from '@prisma/client';
+import { LeaveType, ValidationStatus } from '@prisma/client';
 
 export interface LeaveDAO {
   create(data: Partial<LeaveEntity>): Promise<LeaveEntity>;
@@ -11,7 +11,17 @@ export interface LeaveDAO {
   findByEmployee(employeeId: string): Promise<LeaveEntity[]>;
   update(id: string, data: Partial<LeaveEntity>): Promise<LeaveEntity>;
   delete(id: string): Promise<void>;
-  findAndCount(offset: number, limit: number): Promise<[LeaveEntity[], number]>;
+  findAndCount(
+    offset: number,
+    limit: number,
+    filters?: {
+      employeeUsername?: string;
+      leaveType?: LeaveType;
+      status?: ValidationStatus;
+      startDate?: string;
+      endDate?: string;
+    }
+  ): Promise<[LeaveEntity[], number]>;
   getAllLeaveBalances(): Promise<
     { employeeId: string; acquired: number; taken: number; remaining: number }[]
   >;

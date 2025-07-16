@@ -93,7 +93,7 @@ export class SalaryAdvanceServiceImpl implements SalaryAdvanceService {
       'SALARY_ADVANCE_TO_FINAL_VALIDATE',
       'Validation finale requise',
       `Avance de salaire ${salaryAdvance.id} à valider définitivement`,
-      `${config.server.frontend}/salary-advances/${salaryAdvance.id}/view`
+      `${config.server.frontend}/salary-advances`
     );
   }
 
@@ -114,8 +114,8 @@ export class SalaryAdvanceServiceImpl implements SalaryAdvanceService {
       salaryAdvance.creatorId!,
       'SALARY_ADVANCE_VALIDATED',
       'Votre avance de salaire a été validée',
-      `Identifiant : ${salaryAdvance.id}`,
-      `${config.server.frontend}/salary-advances/${salaryAdvance.id}/view`
+      `Votre avance de salaire a été validée. Identifiant : ${salaryAdvance.id}`,
+      `${config.server.frontend}/salary-advances`
     );
   }
 
@@ -136,8 +136,8 @@ export class SalaryAdvanceServiceImpl implements SalaryAdvanceService {
     await this.notificationService.notify(
       salaryAdvance.creatorId!,
       'SALARY_ADVANCE_REJECTED',
-      'Votre dépense a été rejetée',
-      `Identifiant : ${salaryAdvance.id} — Raison : ${reason}`,
+      'Votre avance de salaire a été rejetée',
+      `Votre avance de salaire a été rejetée. Identifiant : ${salaryAdvance.id} — Raison : ${reason}`,
       `${config.server.frontend}/salary-advances/${salaryAdvance.id}/view`
     );
   }
@@ -148,14 +148,14 @@ export class SalaryAdvanceServiceImpl implements SalaryAdvanceService {
   ): Promise<SalaryAdvanceDTO> {
     const salaryAdvance = await this.dao.findById(id);
     if (!salaryAdvance)
-      throw new ResourceNotFoundException('Dépense non trouvée');
+      throw new ResourceNotFoundException('Avance non trouvée');
 
     const updatedEntity = await this.dao.updateStatus(id, status);
 
     const creator = await this.userDAO.findById(salaryAdvance.creatorId!);
 
     if (!creator) {
-      logger.warn(`Aucun utilisateur trouvé pour la dépense ${id}`);
+      logger.warn(`Aucun utilisateur trouvé pour l'avance ${id}`);
       return toSalaryAdvanceDTO(updatedEntity);
     }
 

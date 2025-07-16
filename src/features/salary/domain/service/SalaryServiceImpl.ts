@@ -85,7 +85,7 @@ export class SalaryServiceImpl implements SalaryService {
       admins.map((a) => a.id),
       'SALARY_CREATED',
       'Nouveau salaire créé',
-      `Identifiant : ${saved.id}`,
+      `Nouveau salaire créé. Identifiant : ${saved.id}`,
       `${config.server.frontend}/salaries/${saved.id}/view`
     );
 

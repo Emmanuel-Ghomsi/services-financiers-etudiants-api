@@ -310,6 +310,9 @@ enum LeaveType {
   ANNUAL
   SICK
   EXCEPTIONAL
+  MATERNITY
+  PATERNITY
+  UNPAID
 }
 
 model Leave {

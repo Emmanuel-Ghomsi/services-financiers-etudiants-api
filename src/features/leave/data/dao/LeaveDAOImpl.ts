@@ -81,16 +81,56 @@ export class LeaveDAOImpl implements LeaveDAO {
 
   async findAndCount(
     offset: number,
-    limit: number
+    limit: number,
+    filters?: {
+      employeeUsername?: string;
+      leaveType?: LeaveType;
+      status?: ValidationStatus;
+      startDate?: string;
+      endDate?: string;
+    }
   ): Promise<[LeaveEntity[], number]> {
+    const whereClause: any = {};
+
+    if (filters?.leaveType) {
+      whereClause.leaveType = filters.leaveType;
+    }
+    if (filters?.status) {
+      whereClause.status = filters.status;
+    }
+    if (filters?.startDate || filters?.endDate) {
+      whereClause.startDate = {};
+      if (filters.startDate) {
+        whereClause.startDate.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        whereClause.startDate.lte = new Date(filters.endDate);
+      }
+    }
+
+    if (filters?.employeeUsername) {
+      whereClause.employee = {
+        user: {
+          username: filters.employeeUsername,
+        },
+      };
+    }
+
     const [items, total] = await prisma.$transaction([
       prisma.leave.findMany({
         skip: offset,
         take: limit,
+        where: whereClause,
         orderBy: { startDate: 'desc' },
+        include: {
+          employee: true,
+        },
       }),
-      prisma.leave.count(),
+      prisma.leave.count({
+        where: whereClause,
+      }),
     ]);
+
     return [items.map(this.toEntity), total];
   }
 

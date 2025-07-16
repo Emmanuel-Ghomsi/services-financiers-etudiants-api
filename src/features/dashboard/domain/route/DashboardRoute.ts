@@ -45,6 +45,28 @@ export async function registerDashboardRoutes(
   );
 
   app.get(
+    '/dashboard/summary/admin',
+    {
+      schema: {
+        tags: ['Dashboard'],
+        summary: "Résumé global (salaires, avances, dépenses) de l'année",
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              totalSalaries: { type: 'number' },
+              totalAdvances: { type: 'number' },
+              totalExpenses: { type: 'number' },
+            },
+          },
+        },
+      },
+      preHandler: [app.authenticate, app.authorize(['SUPER_ADMIN', 'ADMIN'])],
+    },
+    async (req, res) => DashboardController.getAdminSummary(req, res, service)
+  );
+
+  app.get(
     '/dashboard/salary-evolution',
     {
       preHandler: [

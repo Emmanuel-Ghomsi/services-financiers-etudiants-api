@@ -54,6 +54,16 @@ export class DashboardServiceImpl implements DashboardService {
     return { totalSalaries, pendingAdvances, monthlyExpenses, activeLeaves };
   }
 
+  async getAdminSummary() {
+    const [totalSalaries, totalAdvances, totalExpenses] = await Promise.all([
+      this.dao.getTotalSalaries(),
+      this.dao.getTotalValidatedAdvances(),
+      this.dao.getTotalExpenses(),
+    ]);
+
+    return { totalSalaries, totalAdvances, totalExpenses };
+  }
+
   async getMonthlySalaryEvolution(
     year: number
   ): Promise<{ month: number; total: number }[]> {

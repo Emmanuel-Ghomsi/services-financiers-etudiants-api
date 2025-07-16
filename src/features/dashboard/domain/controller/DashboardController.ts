@@ -37,6 +37,15 @@ export class DashboardController {
     return reply.send(summary);
   }
 
+  static async getAdminSummary(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const summary = await service.getAdminSummary();
+    return reply.send(summary);
+  }
+
   static async getSalaryEvolution(
     request: FastifyRequest,
     reply: FastifyReply,

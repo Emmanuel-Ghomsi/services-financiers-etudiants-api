@@ -63,7 +63,7 @@ export class ExpenseServiceImpl implements ExpenseService {
       admins.map((a) => a.id),
       'EXPENSE_CREATED',
       'Nouvelle dépense créée',
-      `Identifiant : ${saved.id}`,
+      `Nouvelle dépense créée. Identifiant : ${saved.id}`,
       `${config.server.frontend}/expenses/${saved.id}/view`
     );
 
@@ -179,8 +179,8 @@ export class ExpenseServiceImpl implements ExpenseService {
     await this.notificationService.notify(
       expense.creatorId!,
       'EXPENSE_VALIDATED',
-      'Votre fiche a été validée',
-      `Identifiant : ${expense.id}`,
+      'Votre dépense a été validée',
+      `Votre dépense a été validée. Identifiant : ${expense.id}`,
       `${config.server.frontend}/expenses/${expense.id}/view`
     );
   }
@@ -201,7 +201,7 @@ export class ExpenseServiceImpl implements ExpenseService {
       expense.creatorId!,
       'EXPENSE_REJECTED',
       'Votre dépense a été rejetée',
-      `Identifiant : ${expense.id} — Raison : ${reason}`,
+      `Votre dépense a été rejetée. Identifiant : ${expense.id} — Raison : ${reason}`,
       `${config.server.frontend}/expenses/${expense.id}/view`
     );
   }

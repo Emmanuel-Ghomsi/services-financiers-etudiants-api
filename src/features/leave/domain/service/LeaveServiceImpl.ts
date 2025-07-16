@@ -55,8 +55,8 @@ export class LeaveServiceImpl implements LeaveService {
       admins.map((a) => a.id),
       'LEAVE_CREATED',
       'Nouveau congé créé',
-      `Identifiant : ${saved.id}`,
-      `${config.server.frontend}/leaves/${saved.id}/view`
+      `Nouveau congé créé, identifiant : ${saved.id}`,
+      `${config.server.frontend}/leaves`
     );
 
     return toLeaveDTO(saved);
@@ -92,9 +92,15 @@ export class LeaveServiceImpl implements LeaveService {
   async getPaginatedLeaves(
     query: LeaveListRequest
   ): Promise<LeavePaginationDTO> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const offset = (page - 1) * limit;
-    const [items, totalItems] = await this.leaveDAO.findAndCount(offset, limit);
+
+    const [items, totalItems] = await this.leaveDAO.findAndCount(
+      offset,
+      limit,
+      filters
+    );
+
     return {
       items: items.map(toLeaveDTO),
       currentPage: page,
@@ -157,7 +163,7 @@ export class LeaveServiceImpl implements LeaveService {
       'LEAVE_TO_FINAL_VALIDATE',
       'Validation finale requise',
       `Congé ${leave.id} à valider définitivement`,
-      `${config.server.frontend}/leaves/${leave.id}/view`
+      `${config.server.frontend}/leaves`
     );
   }
 
@@ -178,8 +184,8 @@ export class LeaveServiceImpl implements LeaveService {
       leave.reviewedBy!,
       'LEAVE_VALIDATED',
       'Votre congé a été validée',
-      `Identifiant : ${leave.id}`,
-      `${config.server.frontend}/leaves/${leave.id}/view`
+      `Votre congé a été validée, identifiant : ${leave.id}`,
+      `${config.server.frontend}/leaves`
     );
   }
 
@@ -199,8 +205,8 @@ export class LeaveServiceImpl implements LeaveService {
       leave.reviewedBy!,
       'leave_REJECTED',
       'Votre congé a été rejetée',
-      `Identifiant : ${leave.id} — Raison : ${reason}`,
-      `${config.server.frontend}/leaves/${leave.id}/view`
+      `Votre congé a été rejetée, identifiant : ${leave.id} — Raison : ${reason}`,
+      `${config.server.frontend}/leaves`
     );
   }
 
@@ -226,7 +232,7 @@ export class LeaveServiceImpl implements LeaveService {
         'LEAVE_TO_VALIDATE',
         'Validation dépense',
         `Dépense ${leaveId} à valider`,
-        `${config.server.frontend}/leaves/${leave.id}/view`
+        `${config.server.frontend}/leaves`
       );
     } else if (status === ValidationStatus.AWAITING_SUPERADMIN_VALIDATION) {
       const superAdmins = await this.userDAO.findAllByRoles(['SUPER_ADMIN']);
@@ -235,7 +241,7 @@ export class LeaveServiceImpl implements LeaveService {
         'LEAVE_TO_FINAL_VALIDATE',
         'Validation finale dépense requise',
         `Dépense ${leaveId} à valider définitivement`,
-        `${config.server.frontend}/leaves/${leave.id}/view`
+        `${config.server.frontend}/leaves`
       );
     }
 

@@ -13,6 +13,11 @@ export interface DashboardService {
     monthlyExpenses: number;
     activeLeaves: number;
   }>;
+  getAdminSummary(): Promise<{
+    totalSalaries: number;
+    totalAdvances: number;
+    totalExpenses: number;
+  }>;
   getMonthlySalaryEvolution(
     year: number
   ): Promise<{ month: number; total: number }[]>;

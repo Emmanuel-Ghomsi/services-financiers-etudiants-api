@@ -13,6 +13,7 @@ export class DashboardDAOImpl implements DashboardDAO {
     const result = await this.prisma.salary.aggregate({
       where: {
         paymentDate: { gte: start, lt: end },
+        status: ValidationStatus.VALIDATED,
       },
       _sum: {
         netSalary: true,
@@ -20,6 +21,37 @@ export class DashboardDAOImpl implements DashboardDAO {
     });
 
     return result._sum.netSalary ?? 0;
+  }
+
+  async getTotalSalaries(): Promise<number> {
+    const result = await this.prisma.salary.aggregate({
+      where: {
+        status: ValidationStatus.VALIDATED,
+      },
+      _sum: {
+        netSalary: true,
+      },
+    });
+
+    return result._sum.netSalary ?? 0;
+  }
+
+  async getTotalValidatedAdvances(): Promise<number> {
+    return this.prisma.salaryAdvance.count({
+      where: {
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+  }
+
+  async getTotalExpenses(): Promise<number> {
+    const expenses = await this.prisma.expense.findMany({
+      where: {
+        status: ValidationStatus.VALIDATED,
+      },
+    });
+
+    return expenses.reduce((sum, e) => sum + e.amount, 0);
   }
 
   async getPendingAdvancesCount(): Promise<number> {
@@ -38,7 +70,10 @@ export class DashboardDAOImpl implements DashboardDAO {
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const expenses = await this.prisma.expense.findMany({
-      where: { date: { gte: start, lt: end } },
+      where: {
+        date: { gte: start, lt: end },
+        status: ValidationStatus.VALIDATED,
+      },
     });
 
     return expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -64,6 +99,7 @@ export class DashboardDAOImpl implements DashboardDAO {
           gte: new Date(`${year}-01-01`),
           lt: new Date(`${year + 1}-01-01`),
         },
+        status: ValidationStatus.VALIDATED,
       },
       select: {
         paymentDate: true,
@@ -100,6 +136,7 @@ export class DashboardDAOImpl implements DashboardDAO {
           gte: start,
           lt: end,
         },
+        status: ValidationStatus.VALIDATED,
       },
       _sum: {
         amount: true,
