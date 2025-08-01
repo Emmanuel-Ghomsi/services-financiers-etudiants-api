@@ -6,6 +6,7 @@ import { AddRoleRequest } from '@features/auth/presentation/payload/AddRoleReque
 import { DeleteAccountRequest } from '@features/auth/presentation/payload/DeleteAccountRequest';
 import { UserListRequest } from '@features/auth/presentation/payload/UserListRequest';
 import { AdminUpdateUserRequest } from '@features/auth/presentation/payload/AdminUpdateUserRequest';
+import { logger } from '@core/config/logger';
 
 export class UserController {
   /**
@@ -87,6 +88,7 @@ export class UserController {
     res: FastifyReply,
     userService: UserService
   ) {
+    logger.info(`Body ${req.body}`);
     const updated = await userService.addRole(req.params.id, req.body);
     res.send(updated);
   }

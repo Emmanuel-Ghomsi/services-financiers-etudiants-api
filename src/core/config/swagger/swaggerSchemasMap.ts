@@ -25,9 +25,51 @@ import { ClientFilePepRequestSchema } from '@features/clientFile/presentation/pa
 import { ClientFileServicesRequestSchema } from '@features/clientFile/presentation/payload/ClientFileServicesRequest';
 import { ClientFileSituationRequestSchema } from '@features/clientFile/presentation/payload/ClientFileSituationRequest';
 import { UpdateClientFileStatusRequestSchema } from '@features/clientFile/presentation/payload/UpdateClientFileStatusRequest';
+import { CreateExpenseRequestSchema } from '@features/expense/presentation/payload/CreateExpenseRequest';
+import { ExpenseListRequestSchema } from '@features/expense/presentation/payload/ExpenseListRequest';
+import { UpdateExpenseRequestSchema } from '@features/expense/presentation/payload/UpdateExpenseRequest';
 import { GetMediaRequestSchema } from '@features/media/presentation/payload/GetMediaRequest';
 import { UpdateProfilePictureRequestSchema } from '@features/media/presentation/payload/UpdateProfilePictureRequest';
+import { CreateSalaryRequestSchema } from '@features/salary/presentation/payload/CreateSalaryRequest';
+import { UpdateSalaryRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryRequest';
+import { SalaryListRequestSchema } from '@features/salary/presentation/payload/SalaryListRequest';
+import { CreateLeaveRequestSchema } from '@features/leave/presentation/payload/CreateLeaveRequest';
+import { UpdateLeaveRequestSchema } from '@features/leave/presentation/payload/UpdateLeaveRequest';
+import { LeaveListRequestSchema } from '@features/leave/presentation/payload/LeaveListRequest';
+
 import { z } from 'zod';
+import { SalaryPeriodFilterRequestSchema } from '@features/salary/presentation/payload/SalaryPeriodFilterRequest';
+import { SalaryPeriodPaginatedRequestSchema } from '@features/salary/presentation/payload/SalaryPeriodPaginatedRequest';
+import { ExpenseFilterRequestSchema } from '@features/expense/presentation/payload/ExpenseFilterRequest';
+import { ExpenseStatsRequestSchema } from '@features/expense/presentation/payload/ExpenseStatsRequest';
+import { LeaveStatsRequestSchema } from '@features/leave/presentation/payload/LeaveStatsRequest';
+import { LeaveBalanceRequestSchema } from '@features/leave/presentation/payload/LeaveBalanceRequest';
+import { UpdateSalaryAdvanceStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryAdvanceStatusRequest';
+import { CreateSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/CreateSalaryAdvanceRequest';
+import { ExpenseDTOSchema } from '@features/expense/presentation/dto/ExpenseDTO';
+import { ExpensePaginationDTOSchema } from '@features/expense/presentation/dto/ExpensePaginationDTO';
+import { ExpenseStatsDTOSchema } from '@features/expense/presentation/dto/ExpenseStatsDTO';
+import { SalaryAdvanceDTOSchema } from '@features/salary/presentation/dto/SalaryAdvanceDTO';
+import { SalaryDTOSchema } from '@features/salary/presentation/dto/SalaryDTO';
+import { SalaryPaginationDTOSchema } from '@features/salary/presentation/dto/SalaryPaginationDTO';
+import { SalaryPdfDataDTOSchema } from '@features/salary/presentation/dto/SalaryPdfDataDTO';
+import { SalaryPeriodDTOSchema } from '@features/salary/presentation/dto/SalaryPeriodDTO';
+import { SalaryPeriodPaginationDTOSchema } from '@features/salary/presentation/dto/SalaryPeriodPaginationDTO';
+import { LeaveBalanceDTOSchema } from '@features/leave/presentation/dto/LeaveBalanceDTO';
+import { LeaveDTOSchema } from '@features/leave/presentation/dto/LeaveDTO';
+import { LeavePaginationDTOSchema } from '@features/leave/presentation/dto/LeavePaginationDTO';
+import { LeaveStatsDTOSchema } from '@features/leave/presentation/dto/LeaveStatsDTO';
+import { RejectExpenseRequestSchema } from '@features/expense/presentation/payload/RejectExpenseRequest';
+import { RejectLeaveRequestSchema } from '@features/leave/presentation/payload/RejectLeaveRequest';
+import { ValidateLeaveRequestSchema } from '@features/leave/presentation/payload/ValidateLeaveRequest';
+import { RejectSalaryRequestSchema } from '@features/salary/presentation/payload/RejectSalaryRequest';
+import { RejectSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/RejectSalaryAdvanceRequest';
+import { ValidateSalaryAdvanceRequestSchema } from '@features/salary/presentation/payload/ValidateSalaryAdvanceRequest';
+import { ValidateExpenseRequestSchema } from '@features/expense/presentation/payload/ValidateExpenseRequest';
+import { ValidateSalaryRequestSchema } from '@features/salary/presentation/payload/ValidateSalaryRequest';
+import { UpdateLeaveStatusRequestSchema } from '@features/leave/presentation/payload/UpdateLeaveStatusRequest';
+import { UpdateExpenseStatusRequestSchema } from '@features/expense/presentation/payload/UpdateExpenseStatusRequest';
+import { UpdateSalaryStatusRequestSchema } from '@features/salary/presentation/payload/UpdateSalaryStatusRequest';
 
 export const swaggerSchemasMap: Record<string, z.ZodType> = {
   // 🔐 Auth
@@ -66,4 +108,51 @@ export const swaggerSchemasMap: Record<string, z.ZodType> = {
   // Media
   UpdateProfilePictureRequest: UpdateProfilePictureRequestSchema,
   GetMediaRequest: GetMediaRequestSchema,
+
+  // Expense
+  CreateExpenseRequest: CreateExpenseRequestSchema,
+  UpdateExpenseRequest: UpdateExpenseRequestSchema,
+  ExpenseListRequest: ExpenseListRequestSchema,
+  ExpenseFilterRequest: ExpenseFilterRequestSchema,
+  ExpenseStatsRequest: ExpenseStatsRequestSchema,
+  ExpenseDTO: ExpenseDTOSchema,
+  ExpensePaginationDTO: ExpensePaginationDTOSchema,
+  ExpenseStatsDTO: ExpenseStatsDTOSchema,
+  RejectExpenseRequest: RejectExpenseRequestSchema,
+  ValidateExpenseRequest: ValidateExpenseRequestSchema,
+  UpdateExpenseStatusRequest: UpdateExpenseStatusRequestSchema,
+
+  // Salary
+  CreateSalaryRequest: CreateSalaryRequestSchema,
+  UpdateSalaryRequest: UpdateSalaryRequestSchema,
+  SalaryListRequest: SalaryListRequestSchema,
+  SalaryPeriodFilterRequest: SalaryPeriodFilterRequestSchema,
+  SalaryPeriodPaginatedRequest: SalaryPeriodPaginatedRequestSchema,
+  UpdateSalaryAdvanceStatusRequest: UpdateSalaryAdvanceStatusRequestSchema,
+  CreateSalaryAdvanceRequest: CreateSalaryAdvanceRequestSchema,
+  SalaryAdvanceDTO: SalaryAdvanceDTOSchema,
+  SalaryDTO: SalaryDTOSchema,
+  SalaryPaginationDTO: SalaryPaginationDTOSchema,
+  SalaryPdfDataDTO: SalaryPdfDataDTOSchema,
+  SalaryPeriodDTO: SalaryPeriodDTOSchema,
+  SalaryPeriodPaginationDTO: SalaryPeriodPaginationDTOSchema,
+  RejectSalaryRequest: RejectSalaryRequestSchema,
+  ValidateSalaryRequest: ValidateSalaryRequestSchema,
+  RejectSalaryAdvanceRequest: RejectSalaryAdvanceRequestSchema,
+  ValidateSalaryAdvanceRequest: ValidateSalaryAdvanceRequestSchema,
+  UpdateSalaryStatusRequest: UpdateSalaryStatusRequestSchema,
+
+  // Leave
+  CreateLeaveRequest: CreateLeaveRequestSchema,
+  UpdateLeaveRequest: UpdateLeaveRequestSchema,
+  LeaveListRequest: LeaveListRequestSchema,
+  LeaveStatsRequest: LeaveStatsRequestSchema,
+  LeaveBalanceRequest: LeaveBalanceRequestSchema,
+  LeaveBalanceDTO: LeaveBalanceDTOSchema,
+  LeaveDTO: LeaveDTOSchema,
+  LeavePaginationDTO: LeavePaginationDTOSchema,
+  LeaveStatsDTO: LeaveStatsDTOSchema,
+  RejectLeaveRequest: RejectLeaveRequestSchema,
+  ValidateLeaveRequest: ValidateLeaveRequestSchema,
+  UpdateLeaveStatusRequest: UpdateLeaveStatusRequestSchema,
 };

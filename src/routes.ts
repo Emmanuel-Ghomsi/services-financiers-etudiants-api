@@ -21,6 +21,19 @@ import { DashboardServiceImpl } from '@features/dashboard/domain/service/Dashboa
 import { DashboardSuperAdminDAOImpl } from '@features/dashboard/data/dao/DashboardSuperAdminDAOImpl';
 import { DashboardAdminDAOImpl } from '@features/dashboard/data/dao/DashboardAdminDAOImpl';
 import { DashboardAdvisorDAOImpl } from '@features/dashboard/data/dao/DashboardAdvisorDAOImpl';
+import { ExpenseServiceImpl } from '@features/expense/domain/service/ExpenseServiceImpl';
+import { ExpenseDAOImpl } from '@features/expense/data/dao/ExpenseDAOImpl';
+import { registerExpenseRoutes } from '@features/expense/domain/route/ExpenseRoute';
+import { SalaryServiceImpl } from '@features/salary/domain/service/SalaryServiceImpl';
+import { SalaryDAOImpl } from '@features/salary/data/dao/SalaryDAOImpl';
+import { registerSalaryRoutes } from '@features/salary/domain/route/SalaryRoute';
+import { LeaveServiceImpl } from '@features/leave/domain/service/LeaveServiceImpl';
+import { LeaveDAOImpl } from '@features/leave/data/dao/LeaveDAOImpl';
+import { registerLeaveRoutes } from '@features/leave/domain/route/LeaveRoute';
+import { SalaryAdvanceDAOImpl } from '@features/salary/data/dao/SalaryAdvanceDAOImpl';
+import { SalaryAdvanceServiceImpl } from '@features/salary/domain/service/SalaryAdvanceServiceImpl';
+import { registerSalaryAdvanceRoutes } from '@features/salary/domain/route/SalaryAdvanceRoute';
+import { DashboardDAOImpl } from '@features/dashboard/data/dao/DashboardDAOImpl';
 
 export const registerRoutes = async (app: FastifyInstance) => {
   const prisma = new PrismaClient();
@@ -28,6 +41,7 @@ export const registerRoutes = async (app: FastifyInstance) => {
   const clientFileDAO = new ClientFileDAOImpl(prisma);
   const notificationDAO = new NotificationDAOImpl(prisma);
   const mediaDAO = new MediaDAOImpl();
+  const dashboardDAO = new DashboardDAOImpl(prisma);
 
   const authService = new AuthServiceImpl(userDAO);
   const userService = new UserServiceImpl(userDAO);
@@ -41,7 +55,33 @@ export const registerRoutes = async (app: FastifyInstance) => {
   const dashboardService = new DashboardServiceImpl(
     new DashboardSuperAdminDAOImpl(prisma),
     new DashboardAdminDAOImpl(prisma),
-    new DashboardAdvisorDAOImpl(prisma)
+    new DashboardAdvisorDAOImpl(prisma),
+    dashboardDAO
+  );
+  const expenseService = new ExpenseServiceImpl(
+    new ExpenseDAOImpl(),
+    userDAO,
+    notificationService
+  );
+  const leaveService = new LeaveServiceImpl(
+    new LeaveDAOImpl(),
+    userDAO,
+    notificationService
+  );
+
+  const salaryAdvanceDAO = new SalaryAdvanceDAOImpl(prisma);
+  const salaryAdvanceService = new SalaryAdvanceServiceImpl(
+    salaryAdvanceDAO,
+    userDAO,
+    notificationService
+  );
+
+  const salaryDAO = new SalaryDAOImpl(prisma);
+  const salaryService = new SalaryServiceImpl(
+    salaryDAO,
+    salaryAdvanceDAO,
+    userDAO,
+    notificationService
   );
 
   app.register(
@@ -52,6 +92,10 @@ export const registerRoutes = async (app: FastifyInstance) => {
       await registerNotificationRoutes(router, notificationService);
       await registerMediaRoutes(router, mediaService);
       await registerDashboardRoutes(router, dashboardService);
+      await registerExpenseRoutes(router, expenseService);
+      await registerSalaryRoutes(router, salaryService);
+      await registerSalaryAdvanceRoutes(router, salaryAdvanceService);
+      await registerLeaveRoutes(router, leaveService);
     },
     { prefix: `/${config.server.prefix}/` }
   );

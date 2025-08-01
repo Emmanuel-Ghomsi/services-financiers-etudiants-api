@@ -27,4 +27,45 @@ export class DashboardController {
 
     return res.status(403).send({ message: 'Rôle non autorisé' });
   }
+
+  static async getSummary(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const summary = await service.getSummary();
+    return reply.send(summary);
+  }
+
+  static async getAdminSummary(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const summary = await service.getAdminSummary();
+    return reply.send(summary);
+  }
+
+  static async getSalaryEvolution(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const { year } = request.query as { year: string };
+    const data = await service.getMonthlySalaryEvolution(parseInt(year));
+    return reply.send(data);
+  }
+
+  static async getExpenseDistribution(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    service: DashboardService
+  ) {
+    const { year, month } = request.query as { year: string; month?: string };
+    const data = await service.getExpenseDistribution(
+      parseInt(year),
+      month ? parseInt(month) : undefined
+    );
+    return reply.send(data);
+  }
 }

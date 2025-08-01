@@ -13,6 +13,7 @@ enum RoleEnum {
   ADMIN
   SUB_ADMIN
   ADVISOR
+  RH
 }
 
 enum UserStatus {
@@ -31,23 +32,31 @@ model User {
   lastname         String
   phone            String
   address          String
-  profilePicture   String? // URL ou path vers la photo de profil
+  profilePicture   String?
   emailVerified    Boolean    @default(false)
   firstLoginToken  String?    @unique
   firstLoginExpiry DateTime?
   status           UserStatus @default(ACTIVE)
 
-  refreshTokens RefreshToken[]
-  roles         UserToRole[]
+  refreshTokens         RefreshToken[]
+  roles                 UserToRole[]
+  clientFiles           ClientFile[]
+  Notification          Notification[]
+  expenses              Expense[]
+  salaries              Salary[]        @relation("Salary_Employee")
+  leavesRequested       Leave[]         @relation("Leave_Employee")
+  leavesReviewed        Leave[]         @relation("Leave_Reviewed")
+  salaryAdvances        SalaryAdvance[] @relation("Advance_Employee")
+  expensesCreator       Expense[]       @relation("Expense_Creator")
+  salariesCreator       Salary[]        @relation("Salary_Creator")
+  salaryAdvancesCreator SalaryAdvance[] @relation("Advance_Creator")
 
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  deletedAt    DateTime?
-  clientFiles  ClientFile[]
-  Notification Notification[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model UserRole {
@@ -80,11 +89,10 @@ model ClientFile {
   id          String  @id @default(uuid())
   reference   String  @unique
   clientCode  String  @unique
-  reason      String // "New Relationship", "Periodic Review"
-  clientType  String // "Titulaire", "Mandataire"
+  reason      String
+  clientType  String
   nonResident Boolean
 
-  // Step 1: Client Identity
   lastName            String?
   firstName           String?
   email               String?
@@ -100,41 +108,34 @@ model ClientFile {
   taxIdNumber         String?
   taxCountry          String?
 
-  // Step 2: Contact/Domicile
   homeAddress         String?
   postalAddress       String?
   taxResidenceCountry String?
   phoneNumbers        String?
 
-  // Step 3: Activity/Situation
   profession        String?
   businessSector    String?
   activityStartDate DateTime?
   activityArea      String?
 
-  // Step 4: Client Situation
-  incomeSources          String? // "salary", "pension", "retirement", "other"
+  incomeSources          String?
   monthlyIncome          Float?
   incomeCurrency         String?
   fundsOriginDestination String?
   assets                 String?
 
-  // Step 5: International Transactions
   hasInternationalOps   Boolean?
   transactionCountries  String?
   transactionCurrencies String?
 
-  // Step 6: Products/Services
   offeredAccounts String?
 
-  // Step 7: Account Operations
   expectedOperations String?
   creditAmount       String?
   debitAmount        String?
 
-  // Step 8: Politically Exposed Person
   isPEP         Boolean?
-  pepType       String? // "highPosition" or "closeAssociate"
+  pepType       String?
   pepMandate    String?
   pepEndDate    DateTime?
   pepLinkType   String?
@@ -143,15 +144,13 @@ model ClientFile {
   pepBirthDate  DateTime?
   pepBirthPlace String?
 
-  // Step 9: AML/CFT Classification
-  riskLevel            String? // "low", "medium", "high"
+  riskLevel            String?
   classificationSource String?
   degradationReason    String?
   fatcaStatus          String?
   hasUsIndications     Boolean?
   usIndicationsDetails String?
 
-  // Status and ownership
   status                FileStatus @default(DRAFT)
   creatorId             String
   validatorAdminId      String?
@@ -183,7 +182,7 @@ enum FileStatus {
 
 model Notification {
   id        String   @id @default(uuid())
-  type      String // ex: "CLIENT_FILE_CREATED", "CLIENT_FILE_VALIDATED"
+  type      String
   title     String
   message   String
   userId    String
@@ -192,4 +191,163 @@ model Notification {
   targetUrl String?
 
   user User @relation(fields: [userId], references: [id])
+}
+
+enum ExpenseCategoryGroup {
+  ADMINISTRATIVE
+  MOBILITY
+  MARKETING
+  IT
+  OPERATIONS
+  LEGAL
+  OTHER
+}
+
+enum ExpenseCategory {
+  OFFICE_RENT
+  OFFICE_CHARGES
+  INTERNET
+  OFFICE_SUPPLIES
+  SOFTWARE_SUBSCRIPTIONS
+  POSTAL_FEES
+  INSURANCE
+  LOCAL_TRANSPORT
+  MILEAGE_REIMBURSEMENT
+  FLIGHTS
+  ACCOMMODATION
+  PER_DIEM
+  CAR_RENTAL
+  MISSION_FEES
+  ONLINE_ADS
+  DESIGN
+  PRINTING
+  PHOTOGRAPHY
+  SOCIAL_MEDIA
+  PARTNERSHIPS
+  WEBSITE
+  SOFTWARE_DEV
+  SERVER_HOSTING
+  CYBERSECURITY
+  HARDWARE_PURCHASE
+  SOFTWARE_LICENSES
+  TECH_EQUIPMENT
+  BANK_FEES
+  FREELANCE_FEES
+  EXTERNAL_MISSIONS
+  CERTIFICATION_FEES
+  LEGAL_FEES
+  ADMIN_REGISTRATION
+  LICENSE_RENEWAL
+  COMPLIANCE_FEES
+  TAXES
+  PENALTIES
+  DONATIONS
+  LOSSES
+  ONE_TIME_PURCHASE
+}
+
+enum ValidationStatus {
+  AWAITING_ADMIN_VALIDATION
+  AWAITING_SUPERADMIN_VALIDATION
+  VALIDATED
+  REJECTED
+}
+
+model Expense {
+  id          String               @id @default(uuid())
+  amount      Float
+  date        DateTime
+  category    ExpenseCategory
+  group       ExpenseCategoryGroup
+  description String?
+  fileUrl     String?
+  employeeId  String
+  employee    User                 @relation(fields: [employeeId], references: [id])
+  projectId   String?
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Expense_Creator", fields: [creatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SalaryPaymentMode {
+  BANK_TRANSFER
+  CASH
+  MOBILE_MONEY
+}
+
+model Salary {
+  id          String            @id @default(uuid())
+  employeeId  String
+  employee    User              @relation("Salary_Employee", fields: [employeeId], references: [id])
+  grossSalary Float
+  deductions  Float
+  advances    Float
+  netSalary   Float
+  paymentMode SalaryPaymentMode
+  paymentDate DateTime
+  payslipUrl  String?
+  year        String            @db.Char(4)
+  month       String            @db.Char(2)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Salary_Creator", fields: [creatorId], references: [id])
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  EXCEPTIONAL
+  MATERNITY
+  PATERNITY
+  UNPAID
+}
+
+model Leave {
+  id         String    @id @default(uuid())
+  employeeId String
+  employee   User      @relation("Leave_Employee", fields: [employeeId], references: [id])
+  leaveType  LeaveType
+  startDate  DateTime
+  endDate    DateTime
+  comment    String?
+  reviewedBy String?
+  reviewed   User?     @relation("Leave_Reviewed", fields: [reviewedBy], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+}
+
+model SalaryAdvance {
+  id            String   @id @default(uuid())
+  amount        Float
+  reason        String
+  requestedDate DateTime
+  employeeId    String
+  employee      User     @relation("Advance_Employee", fields: [employeeId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  status                ValidationStatus @default(AWAITING_ADMIN_VALIDATION)
+  validatedByAdmin      String?
+  validatedBySuperAdmin String?
+  rejectedReason        String?
+  creatorId             String?
+  creator               User?            @relation("Advance_Creator", fields: [creatorId], references: [id])
 }
