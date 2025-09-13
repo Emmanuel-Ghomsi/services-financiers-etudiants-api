@@ -8,7 +8,7 @@ import { SalaryAdvanceEntity } from '@features/salary/data/entity/SalaryAdvanceE
 import { UserDAO } from '@features/auth/data/dao/UserDAO';
 import { NotificationService } from '@features/notification/domain/service/NotificationService';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
-import { ValidationStatus } from '@prisma/client';
+import { RoleEnum, ValidationStatus } from '@prisma/client';
 import { ValidationException } from '@core/exceptions/ValidationException';
 import { config } from '@core/config/env';
 import { logger } from '@core/config/logger';
@@ -23,9 +23,23 @@ export class SalaryAdvanceServiceImpl implements SalaryAdvanceService {
   async requestAdvance(
     data: CreateSalaryAdvanceRequest
   ): Promise<SalaryAdvanceDTO> {
-    const created = await this.dao.create(data);
     const user = await this.userDAO.findById(data.userId);
     if (!user) throw new ResourceNotFoundException('Utilisateur non trouvée');
+
+    const created = await this.dao.create({
+      amount: data.amount,
+      reason: data.reason,
+      requestedDate: data.requestedDate,
+      employeeId: data.employeeId,
+      creatorId: data.userId,
+      status: user.roles.includes(RoleEnum.SUPER_ADMIN)
+        ? ValidationStatus.VALIDATED
+        : user.roles.includes(RoleEnum.ADMIN)
+          ? ValidationStatus.AWAITING_SUPERADMIN_VALIDATION
+          : ValidationStatus.AWAITING_ADMIN_VALIDATION,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     return toSalaryAdvanceDTO(created);
   }
