@@ -24,6 +24,7 @@ import { UserDTO } from '@features/auth/presentation/dto/UserDTO';
 import { config } from '@core/config/env';
 import { ResendFirstLoginEmailRequest } from '@features/auth/presentation/payload/ResendFirstLoginEmailRequest';
 import { ResourceNotFoundException } from '@core/exceptions/ResourceNotFoundException';
+import { logger } from '@core/config/logger';
 
 /**
  * Implémentation du service d'authentification
@@ -41,7 +42,11 @@ export class AuthServiceImpl implements AuthService {
       firstLoginExpiry,
     });
 
-    await sendFirstLoginEmail(newUser.email, firstLoginToken); // lien de définition de mot de passe
+    try {
+      await sendFirstLoginEmail(newUser.email, firstLoginToken); // lien de définition de mot de passe
+    } catch (error) {
+      console.error('Failed to send first login email:', error);
+    }
 
     return newUser;
   }
@@ -148,14 +153,23 @@ export class AuthServiceImpl implements AuthService {
   }
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
-    const user = await this.userDAO.findByEmail(data.email);
-    if (!user) return; // pas d'erreur pour éviter enumeration
+    try {
+      const user = await this.userDAO.findByEmail(data.email);
+      if (!user) return; // pas d'erreur pour éviter enumeration
 
-    const token = uuidv4();
-    const expiry = new Date(Date.now() + 1000 * 60 * 60 * 1); // 1h
+      const token = uuidv4();
+      const expiry = new Date(Date.now() + 1000 * 60 * 60 * 1); // 1h
 
-    await this.userDAO.setResetToken(user.id, token, expiry);
-    await sendResetPasswordEmail(user.email, token);
+      await this.userDAO.setResetToken(user.id, token, expiry);
+      try {
+        await sendResetPasswordEmail(user.email, token);
+      } catch (error) {
+        // Log the error but don't fail the request
+        logger.error({ err: error }, 'Failed to send reset password email');
+      }
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to process forgot password request');
+    }
   }
 
   async resetPassword(data: ResetPasswordRequest): Promise<void> {
@@ -189,7 +203,11 @@ export class AuthServiceImpl implements AuthService {
     const user = await this.userDAO.resendFirstLoginToken(email);
     if (!user) throw new ResourceNotFoundException('Utilisateur introuvable');
 
-    await sendFirstLoginEmail(user.email, user.firstLoginToken!);
+    try {
+      await sendFirstLoginEmail(user.email, user.firstLoginToken!);
+    } catch (error) {
+      console.error('Failed to send first login email:', error);
+    }
     return toUserDTO(user);
   }
 }

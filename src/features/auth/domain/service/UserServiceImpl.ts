@@ -73,10 +73,14 @@ export class UserServiceImpl implements UserService {
     const updatedUserEntity = await this.userDAO.adminUpdateUser(userId, data);
 
     // Envoi du mail de première connexion
-    await sendFirstLoginEmail(
-      updatedUserEntity.email,
-      updatedUserEntity.firstLoginToken!
-    );
+    try {
+      await sendFirstLoginEmail(
+        updatedUserEntity.email,
+        updatedUserEntity.firstLoginToken!
+      );
+    } catch (error) {
+      console.error('Failed to send first login email:', error);
+    }
 
     return toUserDTO(updatedUserEntity);
   }
@@ -121,6 +125,10 @@ export class UserServiceImpl implements UserService {
     data: DeleteAccountRequest
   ): Promise<void> {
     await this.userDAO.updateStatus(userId, 'PENDING_DELETION');
-    await sendAccountDeletionRequestEmail(userId, data.reason);
+    try {
+      await sendAccountDeletionRequestEmail(userId, data.reason);
+    } catch (error) {
+      console.error('Failed to send account deletion request email:', error);
+    }
   }
 }
